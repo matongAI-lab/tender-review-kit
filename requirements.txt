@@ -1,0 +1,7 @@
+# bid-review-kit 依赖
+# 全部跨平台 pip 库,标准库之外只装这三个
+# 系统依赖:pdftotext (poppler-utils) — PDF 提取首选,缺则自动回退 pypdf
+
+python-docx>=1.0.0     # .docx 解析(段落 + 表格)
+pypdf>=4.0.0           # PDF 兜底解析(pdftotext 不可用时)
+openpyxl>=3.1.0        # 出 Excel(build_excel.py)

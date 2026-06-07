@@ -1,0 +1,51 @@
+# bid-review-kit · .gitignore
+# 保证开源仓库不含任何用户标书 / 运行时产物。
+
+# 运行时产物(扫过的标书会落在这里)
+workspace/
+
+# 用户标书文件(任何来路的招标文件都不进仓库)
+*.pdf
+*.docx
+*.doc
+
+# 例外:测试用的合成样本必须能进仓库,供回归测试使用
+!tests/fixtures/*.docx
+!tests/fixtures/*.pdf
+
+# Excel 输出(用户产生的核对清单不进仓库)
+*.xlsx
+
+# 决定文件 + coverage 中间产物
+_decisions_*.txt
+*.coverage.json
+*.hits.json
+*.tables.json
+*.lines.txt
+
+# 候选词(含用户标书原文片段):新默认在 workspace/<项目>.candidates.json(已随 workspace/ 整体忽略)
+# 下面是兜底:候选词文件含原文,任何位置都不进仓库
+data/candidates.json
+*.candidates.json
+
+# 开发期私人记录(开源仓库不带)
+OPEN_TASKS.md
+
+# Python
+__pycache__/
+*.pyc
+*.pyo
+*.egg-info/
+.pytest_cache/
+.venv/
+venv/
+env/
+
+# IDE
+.vscode/
+.idea/
+*.swp
+.DS_Store
+
+# Claude Code 本地设置(含本机标书文件名/权限,不进仓库)
+.claude/settings.local.json

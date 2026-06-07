@@ -1,0 +1,421 @@
+{
+  "version": "2.0",
+  "_edition": "Community Edition · 开源基础词库",
+  "_about": "本词库约 100 词,覆盖通用否决/废标/无效/视为/拒收 等核心判决信号。够基本扫描,不够细分场景。Professional Edition 含几百至上千词 + 行业细分 scope(医疗/军工/海外/科研等)+ 实战准确率证明,见 README 路线图。",
+  "_contributing": "扫到新词?跑 scan_candidates.py → 候选区 → promote_candidates.py 审入库 → 提 PR。",
+  "_scope_doc": "scope 取值:bid_phase=投标阶段(递交前)/ evaluation_phase=评标程序 / contract_phase=合同履行期 / customization=商务定制",
+  "categories": [
+    {
+      "id": "primary",
+      "name": "一级判决词",
+      "level": 1,
+      "match_type": "literal",
+      "scope_required": true,
+      "report_section": "三、判决词扫描（一级）",
+      "words": [
+        {
+          "word": "否决",
+          "scope": [
+            "bid_phase",
+            "evaluation_phase"
+          ]
+        },
+        {
+          "word": "被否决",
+          "scope": [
+            "bid_phase",
+            "evaluation_phase"
+          ]
+        },
+        {
+          "word": "予以否决",
+          "scope": [
+            "bid_phase",
+            "evaluation_phase"
+          ]
+        },
+        {
+          "word": "拒绝",
+          "scope": [
+            "contract_phase"
+          ]
+        },
+        {
+          "word": "被拒绝",
+          "scope": [
+            "contract_phase"
+          ]
+        },
+        {
+          "word": "将被拒绝",
+          "scope": [
+            "contract_phase"
+          ]
+        },
+        {
+          "word": "拒收",
+          "scope": [
+            "bid_phase",
+            "contract_phase"
+          ]
+        },
+        {
+          "word": "无效",
+          "scope": [
+            "bid_phase",
+            "evaluation_phase"
+          ]
+        },
+        {
+          "word": "无效投标",
+          "scope": [
+            "bid_phase"
+          ]
+        },
+        {
+          "word": "废标",
+          "scope": [
+            "bid_phase"
+          ]
+        },
+        {
+          "word": "不予受理",
+          "scope": [
+            "bid_phase",
+            "contract_phase"
+          ]
+        },
+        {
+          "word": "不予接受",
+          "scope": [
+            "bid_phase"
+          ]
+        },
+        {
+          "word": "不被推荐",
+          "scope": [
+            "evaluation_phase"
+          ]
+        },
+        {
+          "word": "取消资格",
+          "scope": [
+            "bid_phase",
+            "contract_phase"
+          ]
+        },
+        {
+          "word": "取消投标资格",
+          "scope": [
+            "bid_phase"
+          ]
+        },
+        {
+          "word": "视为撤回",
+          "scope": [
+            "bid_phase"
+          ]
+        },
+        {
+          "word": "视为撤销",
+          "scope": [
+            "bid_phase"
+          ]
+        },
+        {
+          "word": "视为主动撤回",
+          "scope": [
+            "bid_phase"
+          ]
+        },
+        {
+          "word": "视为放弃",
+          "scope": [
+            "bid_phase",
+            "contract_phase"
+          ]
+        },
+        {
+          "word": "视为无效",
+          "scope": [
+            "bid_phase"
+          ]
+        },
+        {
+          "word": "视为未送达",
+          "scope": [
+            "bid_phase"
+          ]
+        },
+        {
+          "word": "视为未投标",
+          "scope": [
+            "bid_phase"
+          ]
+        },
+        {
+          "word": "视为弃标",
+          "scope": [
+            "bid_phase"
+          ]
+        },
+        {
+          "word": "视为弃权",
+          "scope": [
+            "bid_phase"
+          ]
+        },
+        {
+          "word": "视为未响应",
+          "scope": [
+            "bid_phase"
+          ]
+        },
+        {
+          "word": "非响应性",
+          "scope": [
+            "evaluation_phase"
+          ]
+        },
+        {
+          "word": "实质性偏离",
+          "scope": [
+            "evaluation_phase"
+          ]
+        },
+        {
+          "word": "实质性偏差",
+          "scope": [
+            "evaluation_phase"
+          ]
+        },
+        {
+          "word": "作为无效投标处理",
+          "scope": [
+            "evaluation_phase"
+          ]
+        },
+        {
+          "word": "按未送达处理",
+          "scope": [
+            "bid_phase"
+          ]
+        },
+        {
+          "word": "视为不满足",
+          "scope": [
+            "evaluation_phase"
+          ]
+        },
+        {
+          "word": "视为未按规定提交投标",
+          "scope": [
+            "bid_phase"
+          ]
+        },
+        {
+          "word": "视为缺漏项价格已包含",
+          "scope": [
+            "bid_phase"
+          ]
+        },
+        {
+          "word": "不予退还投标保证金的",
+          "scope": [
+            "bid_phase"
+          ]
+        },
+        {
+          "word": "取消其中标资格",
+          "scope": [
+            "bid_phase",
+            "evaluation_phase"
+          ]
+        },
+        {
+          "word": "视为无技术支持资料",
+          "scope": [
+            "bid_phase"
+          ]
+        },
+        {
+          "word": "将不予退还",
+          "scope": [
+            "bid_phase"
+          ]
+        },
+        {
+          "word": "视为放弃中标",
+          "scope": [
+            "bid_phase"
+          ]
+        },
+        {
+          "word": "视为提供备选方案",
+          "scope": [
+            "bid_phase"
+          ]
+        },
+        {
+          "word": "视为主动放弃投标",
+          "scope": [
+            "bid_phase"
+          ]
+        },
+        {
+          "word": "按无效投标处理",
+          "scope": [
+            "evaluation_phase"
+          ]
+        },
+        {
+          "word": "作为废标处理",
+          "scope": [
+            "evaluation_phase"
+          ]
+        },
+        {
+          "word": "视为是实质性偏离",
+          "scope": [
+            "bid_phase"
+          ]
+        }
+      ]
+    },
+    {
+      "id": "secondary",
+      "name": "二级判决词",
+      "level": 2,
+      "match_type": "literal",
+      "scope_required": false,
+      "report_section": "四、判决词扫描（二级）",
+      "words": [
+        "不得",
+        "不允许",
+        "不接受",
+        "必须",
+        "应当",
+        "不予退还",
+        "没收保证金",
+        "得0分",
+        "得零分",
+        "不得分"
+      ]
+    },
+    {
+      "id": "customization",
+      "name": "商务定制门槛",
+      "level": 2,
+      "match_type": "literal",
+      "scope_required": false,
+      "report_section": "六、商务定制门槛信号",
+      "_doc": "识别「关系门槛」类条款 — 投标人需要事先与现有平台厂商建立合作关系并取得授权",
+      "words": [
+        "必须接入",
+        "须接入",
+        "需接入",
+        "应接入",
+        "加盖厂商公章",
+        "加盖原厂公章",
+        "接入许可",
+        "接入授权",
+        "厂商授权",
+        "原厂授权",
+        "原厂出具",
+        "兼容现有",
+        "兼容学校",
+        "兼容我校",
+        "无缝接入",
+        "原建设",
+        "现有平台",
+        "统一管理",
+        "统一平台",
+        "为同一品牌",
+        "同一品牌",
+        "指定品牌",
+        "指定型号",
+        "指定厂商",
+        "指定生产厂家",
+        "原厂指定",
+        "与已有",
+        "与现有",
+        "已有平台",
+        "已有系统",
+        "现有系统",
+        "无缝对接",
+        "原厂代理",
+        "合格供方",
+        "供方目录",
+        "集成商目录",
+        "白名单"
+      ]
+    },
+    {
+      "id": "certifications",
+      "name": "证明文件要求",
+      "level": 2,
+      "match_type": "regex",
+      "scope_required": false,
+      "report_section": "七、证明文件要求",
+      "_doc": "识别招标文件要求的证明文件 — 检测报告、认证证书、入网证、官网截图等",
+      "exclude_patterns": [
+        "提供.{0,5}质保",
+        "提供.{0,5}维保",
+        "提供.{0,5}维修",
+        "提供.{0,5}服务",
+        "提供.{0,5}原厂",
+        "提供.{0,5}产品"
+      ],
+      "words": [
+        "提供.{0,5}检测报告",
+        "提供.{0,5}认证证书",
+        "提供.{0,5}入网证",
+        "提供.{0,5}许可证",
+        "提供.{0,5}授权",
+        "提供官网链接",
+        "提供官网截图",
+        ".{0,3}级服务能力认证",
+        "AAAAA.{0,3}认证",
+        "公安部.{0,3}检测",
+        "工信部.{0,3}入网",
+        "保密科技测评",
+        "网络关键设备",
+        "网络安全专用产品",
+        "ISO9001",
+        "ISO14001",
+        "ISO45001",
+        "CNAS"
+      ]
+    },
+    {
+      "id": "emphasis_marks",
+      "name": "强调标识参数",
+      "level": "special",
+      "match_type": "emphasis",
+      "scope_required": false,
+      "report_section": "八、▲/★ 标识参数",
+      "_doc": "识别招标文件中的强调标识（▲/★/◆/● 等）— 通常表示「实质性响应项」，不响应即否决。自适应识别本份文档实际使用的标识。▲/★ 在招标文件中几乎专用于强调，故阈值=1（少量也不丢，呼应『有多少列多少』）；◆●※■◇☆/* 常兼作项目符号/脚注，保留较高阈值去噪。* 另有正则限定（行首或单元格首 + 紧跟中文）再过滤一层。",
+      "candidates": [
+        "▲",
+        "★",
+        "◆",
+        "●",
+        "※",
+        "■",
+        "◇",
+        "☆",
+        "*"
+      ],
+      "min_occurrences": 3,
+      "min_occurrences_overrides": {
+        "▲": 1,
+        "★": 1
+      },
+      "auto_detect": true
+    }
+  ],
+  "exclude_patterns_global": [
+    "目\\s*录",
+    "第[一二三四五六七八九十]+章"
+  ]
+}

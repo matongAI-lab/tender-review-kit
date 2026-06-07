@@ -1,0 +1,7 @@
+# 统一行尾:文本用 LF 入库,跨平台不产生 CRLF 噪音
+* text=auto eol=lf
+
+# 二进制文件不做行尾转换
+*.docx binary
+*.pdf  binary
+*.xlsx binary
