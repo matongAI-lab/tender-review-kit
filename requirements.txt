@@ -1,4 +1,4 @@
-# bid-review-kit 依赖
+# tender-review-kit 依赖
 # 全部跨平台 pip 库,标准库之外只装这三个
 # 系统依赖:pdftotext (poppler-utils) — PDF 提取首选,缺则自动回退 pypdf
 

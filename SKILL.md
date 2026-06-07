@@ -1,9 +1,9 @@
 ---
-name: bid-review-skill
+name: tender-review-skill
 description: 投标审核 / bid review。拿到招标文件(PDF/Word)→产出投标核对清单(废标项+评分项+证明材料+▲标识参数+时间节点)。当用户给出招标文件要审、问废标点/否决条款/评分项/资格要求,或要做投标合规自检时使用——即使没明说"审核"。产清单和事实,不下"投/不投"结论。Use when analyzing Chinese tender documents: extract disqualification/scoring items, required materials, ▲-marked parameters, with line-numbered evidence.
 ---
 
-# 投标审核 bid-review-skill
+# 投标审核 tender-review-skill
 
 拿一份招标文件,产出「投标核对清单」——帮投标人在递交前发现合规风险、估算得分、列齐要准备的材料。
 - 产出 = **清单 + 事实**(每条带原文出处行号),**不下"投/不投"结论**。
