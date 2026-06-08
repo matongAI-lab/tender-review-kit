@@ -121,10 +121,16 @@ def verify(worklist_file, out_xlsx):
              "Step 7 · 出 Excel")
 
     if ok:
+        candidates_file = ws_dir / (stem + ".candidates.json")
         print("\n" + "=" * 60)
         print("✓ verify 完成！")
         print("  Excel: %s" % out_xlsx)
         print("  如有护栏 warning，回去让 agent 补漏后重跑 verify。")
+        if candidates_file.exists():
+            print()
+            print("  发现了新判词？帮开源项目变更好：")
+            print("    python scripts/export_contribution.py          # 导出脱敏贡献文件")
+            print("    python scripts/export_contribution.py --github  # 一键提 Issue（需 gh CLI）")
 
 
 def main():

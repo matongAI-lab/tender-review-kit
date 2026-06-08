@@ -103,10 +103,15 @@ tender-review-kit/
 
 ## 怎么贡献
 
-**最有价值的贡献 = 扩判词库**:
-1. 用本工具扫一份你手上的招标文件 → `scan_candidates.py` 扫出新候选词
-2. 选出真信号(投标/评标阶段、完整短语、不被现有词包含) → PR 到 `data/keywords.json`
-3. 附上"在哪个标书发现 + 原文片段"作说明
+**最有价值的贡献 = 扩判词库**（一条命令搞定）:
+```bash
+# 审完标书后，导出你发现的新判词（自动脱敏，不含标书原文）
+python scripts/export_contribution.py
+
+# 或一键提 Issue 到 GitHub（需装 gh CLI 并登录）
+python scripts/export_contribution.py --github
+```
+工具会自动收集两条通道（程序正则 + AI 语义）发现的候选词，去掉原文片段，去重现有词库，生成干净的贡献表。
 
 **其他贡献方向**:
 - 补 references(给审标对照清单加条目 / 补专项工作指南)
