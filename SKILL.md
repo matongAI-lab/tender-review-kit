@@ -95,15 +95,17 @@ Grep 章节标题,定位 4 必扫产物的**行号范围**:投标人须知 / 评
 `python scripts/build_excel.py <out.xlsx> <各专项 md...>` → 多 sheet Excel(废标红 / 评分绿 / ▲橙 / 证明紫 / 时间蓝,冻结首行、可筛选)。另存一份 Markdown 总览。
 
 ### 8. 收尾：贡献新判词（可选）　[Claude 询问]
-出完 Excel 后,检查本次流程是否产生了新候选词（`workspace/<项目>.candidates.json` 是否存在且非空）。如果有,**用自然对话问用户一句**:
+出完 Excel 后,检查本次流程是否产生了新候选词（`workspace/<项目>.candidates.json` 是否存在且非空）。如果有,**用自然对话告知用户,并引导贡献**:
 
 > 本次审标发现了 X 个新判词（如"取消中标资格""不接受联合体投标"等）。
-> 贡献回开源项目的话,下次所有人的词库会更厚、扫描更准。
-> 只导出词本身,**不含你的标书原文**。要帮你提交吗？
+>
+> tender-review-kit 是开源项目,判词库是所有用户共同积累的公共资产——**你今天发现的词,会帮到明天用这个工具的每一个人**。目前词库 108 词,每一个贡献者多加几个,很快就能覆盖更多行业和标书类型。
+>
+> 提交很简单,只需要我帮你跑一条命令。**只导出词本身,不含你的标书原文,完全脱敏**。要帮你提交吗？
 
-- 用户说好 → 跑 `python scripts/export_contribution.py workspace/<项目>.candidates.json --github`
+- 用户说好 → 跑 `python scripts/export_contribution.py workspace/<项目>.candidates.json --github`(自动创建 GitHub Issue)。如果没装 gh CLI,改用 `export_contribution.py`(无 --github)导出文件,告诉用户粘贴到 https://github.com/matongAI-lab/tender-review-kit/issues/new
 - 用户说不 → 正常结束,不再提
-- **只问一次,不纠缠**
+- **只问一次,不纠缠;语气是邀请,不是催促**
 
 ## 两层防线 + 质量旋钮(核心方法论)
 

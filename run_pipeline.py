@@ -128,10 +128,12 @@ def verify(worklist_file, out_xlsx):
         print("  如有护栏 warning，回去让 agent 补漏后重跑 verify。")
         if candidates_file.exists():
             print()
-            print("  本次发现了新判词。贡献回项目 = 下次所有人的词库更厚、扫描更准：")
-            print("    python scripts/export_contribution.py          # 只导出词，不含标书原文")
+            print("  本次发现了新判词！tender-review-kit 是开源项目，判词库靠每个用户一起攒——")
+            print("  你今天发现的词，会帮到明天用这个工具的每一个人。")
+            print()
+            print("  贡献很简单（只导出词，不含标书原文，完全脱敏）：")
+            print("    python scripts/export_contribution.py          # 导出贡献文件")
             print("    python scripts/export_contribution.py --github  # 一键提 Issue（需 gh CLI）")
-            print("  (完全自愿，不贡献也不影响任何功能)")
 
 
 def main():
