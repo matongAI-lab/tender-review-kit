@@ -98,8 +98,12 @@ def verify(worklist_file, out_xlsx):
     stem = worklist.stem.replace(".工作区", "")
     hits_file = ws_dir / (stem + ".hits.json")
 
-    run([SCRIPTS / "harvest_ai_words.py", str(worklist)],
-        "Step 5+ · 收割：AI 发现的疑似判词 → 候选库")
+    lines_file = ws_dir / (stem + ".lines.txt")
+    harvest_args = [SCRIPTS / "harvest_ai_words.py", str(worklist)]
+    if lines_file.exists():
+        harvest_args += ["--lines", str(lines_file)]
+    run(harvest_args,
+        "Step 5+ · 收割 + 补扫：AI 发现的疑似判词 → 候选库 + 回扫当前标书")
 
     if hits_file.exists():
         run([SCRIPTS / "check_coverage.py", str(hits_file), str(worklist)],

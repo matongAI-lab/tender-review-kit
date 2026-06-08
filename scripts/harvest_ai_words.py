@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
 # -*- coding: utf-8 -*-
-"""harvest_ai_words.py — 收割 AI 在判断阶段发现的疑似判词，合并进候选库
+"""harvest_ai_words.py — 收割 AI 在判断阶段发现的疑似判词，合并进候选库 + 回扫当前标书
 
 AI 在 Step 5 读条款时可能发现 hits.json 没覆盖的判决性语言。
 按 SKILL.md 约定，AI 会把这些词写进工作区 md 的 `## AI发现疑似判词` 表格。
@@ -8,10 +8,11 @@ AI 在 Step 5 读条款时可能发现 hits.json 没覆盖的判决性语言。
 本脚本：
 1. 解析该表格（疑似判词 | 原文摘要 | 出处 | 建议分类）
 2. 合并进 workspace/<项目>.candidates.json（去重、标 source=ai_discovery）
-3. 不自动入库 keywords.json，仍走 promote_candidates.py 人审流程
+3. 拿新发现的词回扫当前 lines.txt（--lines），找出 AI 没看到的行 → 补扫命中报告
+4. 不自动入库 keywords.json，仍走 promote_candidates.py 人审流程
 
 用法：
-    python harvest_ai_words.py <工作区.md> [--out candidates.json]
+    python harvest_ai_words.py <工作区.md> [--lines <lines.txt>] [--out candidates.json]
 """
 import sys
 import re
@@ -135,9 +136,43 @@ def merge_into_candidates(found, out_path):
     return added, len(existing)
 
 
+def rescan_lines(found, lines_path, worklist_path):
+    """拿 AI 发现的词回扫 lines.txt，找出工作区 md 中没引用到的行"""
+    rows = []
+    with open(lines_path, encoding="utf-8") as f:
+        for raw in f:
+            raw = raw.rstrip("\n")
+            if "\t" in raw:
+                no, txt = raw.split("\t", 1)
+                try:
+                    rows.append((int(no), txt))
+                    continue
+                except ValueError:
+                    pass
+            if raw:
+                rows.append((len(rows) + 1, raw))
+
+    md_text = Path(worklist_path).read_text(encoding="utf-8")
+    cited_lines = set()
+    for m in re.finditer(r"行(\d+)", md_text):
+        cited_lines.add(int(m.group(1)))
+
+    words = [c["word"] for c in found]
+    missed = []
+    for lineno, text in rows:
+        if lineno in cited_lines:
+            continue
+        for w in words:
+            if w in text:
+                missed.append({"line": lineno, "word": w, "text": text})
+                break
+
+    return missed
+
+
 def main():
     if len(sys.argv) < 2:
-        print("用法: python harvest_ai_words.py <工作区.md> [--out candidates.json]")
+        print("用法: python harvest_ai_words.py <工作区.md> [--lines <lines.txt>] [--out candidates.json]")
         sys.exit(1)
 
     md_path = sys.argv[1]
@@ -146,13 +181,28 @@ def main():
         sys.exit(1)
 
     out = None
-    for i, a in enumerate(sys.argv):
-        if a == "--out" and i + 1 < len(sys.argv):
+    lines_path = None
+    i = 2
+    while i < len(sys.argv):
+        if sys.argv[i] == "--out" and i + 1 < len(sys.argv):
             out = sys.argv[i + 1]
+            i += 2
+        elif sys.argv[i] == "--lines" and i + 1 < len(sys.argv):
+            lines_path = sys.argv[i + 1]
+            i += 2
+        else:
+            i += 1
+
+    stem = Path(md_path).stem.replace(".工作区", "")
+    ws_dir = Path(md_path).parent
 
     if not out:
-        stem = Path(md_path).stem.replace(".工作区", "")
-        out = str(Path(md_path).parent / (stem + ".candidates.json"))
+        out = str(ws_dir / (stem + ".candidates.json"))
+
+    if not lines_path:
+        auto = ws_dir / (stem + ".lines.txt")
+        if auto.exists():
+            lines_path = str(auto)
 
     found = parse_ai_section(md_path)
 
@@ -169,6 +219,23 @@ def main():
         print("  %s (scope=%s cat=%s) | %s"
               % (c["word"], "/".join(c["suggested_scope"]),
                  c["suggested_category"], c["contexts"][0][:50]))
+
+    if lines_path and Path(lines_path).exists():
+        missed = rescan_lines(found, lines_path, md_path)
+        if missed:
+            print("\n⚠ 补扫命中 %d 条（AI 发现的词在当前标书中还出现在以下未引用行）：" % len(missed))
+            for m in missed[:20]:
+                print("  行%-5d [%s] %s" % (m["line"], m["word"], m["text"][:60]))
+            if len(missed) > 20:
+                print("  ... 还有 %d 条" % (len(missed) - 20))
+            print("→ 建议让 AI 检查这些行，判断是否需要纳入清单。")
+        else:
+            print("\n✓ 补扫：AI 发现的词在当前标书中无遗漏行。")
+    elif lines_path:
+        print("\n⚠ 未找到 %s，跳过补扫。" % lines_path)
+    else:
+        print("\n⚠ 未指定 --lines 且未自动找到 lines.txt，跳过补扫。")
+
     print("\n提示：这些词仍需 promote_candidates.py 人审后才入库 keywords.json。")
 
 
