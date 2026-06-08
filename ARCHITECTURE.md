@@ -66,15 +66,16 @@ A/B 红蓝对抗怎么做:关键专项派**两个独立 subagent**各做一遍,�
 - **重要标书** → 关键专项开 A/B 双跑对抗
 - **普通标书** → 单跑 + 程序护栏(反向校验)就够
 
-## 六、五道程序护栏(都是确定性,都防漏)
+## 六、六道程序护栏(都是确定性,都防漏)
 
 | # | 程序 | 防什么 |
 |---|---|---|
 | 1 | `scan_keywords.py` | 撒网:判词库逐行扫,每条命中保证扫到 |
-| 2 | `scan_candidates.py` | 补词:扫"像判决词、未入库"的新词 → 候选区(人审核入库) |
-| 3 | `check_coverage.py` | 反向校验:命中是否被废标清单覆盖,未覆盖列出 |
-| 4 | `check_completeness.py` | 通用"明显偏少"警示 + 评分梯度含"分"字 + ▲ ≥ 撒网 ×80% |
-| 5 | `cross_doc.py` | 跨文件矛盾:金额/日期/子系统数量确定性比对 |
+| 2 | `scan_candidates.py` | 补词(程序通道):扫"像判决词、未入库"的新词 → 候选区(人审核入库) |
+| 3 | `harvest_ai_words.py` | 补词(AI通道):收割 AI 在判断阶段发现的疑似判词 → 同一候选区 |
+| 4 | `check_coverage.py` | 反向校验:命中是否被废标清单覆盖,未覆盖列出 |
+| 5 | `check_completeness.py` | 通用"明显偏少"警示 + 评分梯度含"分"字 + ▲ ≥ 撒网 ×80% |
+| 6 | `cross_doc.py` | 跨文件矛盾:金额/日期/子系统数量确定性比对 |
 
 ## 七、不分 9 类——一张通用清单替代
 
@@ -88,8 +89,8 @@ A/B 红蓝对抗怎么做:关键专项派**两个独立 subagent**各做一遍,�
 ## 八、演进闭环
 
 ```
-实战一份标书 → 候选词扫描 → 人审核入库 → 判词库长厚 →
-回归测试守住不退化 → 案例沉淀 cases/ → 反哺
+实战一份标书 → 两条补词通道(程序正则 + AI语义发现) → 候选库 →
+人审核入库 → 判词库长厚 → 回归测试守住不退化 → 案例沉淀 cases/ → 反哺
 ```
 
 每份扫过的标书去敏后可沉淀进 `cases/`;`tests/` 用合成样本守住基准不退化。
@@ -102,7 +103,7 @@ A/B 红蓝对抗怎么做:关键专项派**两个独立 subagent**各做一遍,�
 | 层 | 已就绪 ✓ |
 |---|---|
 | 编排 | SKILL.md(中文端到端 7 步 + 两层防线 + 质量旋钮) |
-| 程序 | extract_text / scan_keywords / scan_candidates / check_coverage / check_completeness / cross_doc / build_excel |
+| 程序 | extract_text / scan_keywords / scan_candidates / harvest_ai_words / check_coverage / check_completeness / cross_doc / build_excel |
 | 数据 | keywords.json(108 词) ; 候选词在 workspace/<项目>.candidates.json(含原文,不入库,promote 时只转词+scope) |
 | 知识 | disqualification-checklist(审标对照总清单) + commercial × 4 + technical × 3 |
 | 反哺 | cases / tests 基础 |

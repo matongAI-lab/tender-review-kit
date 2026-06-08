@@ -14,7 +14,7 @@
 ## 版本路线
 
 **当前版本:Community Edition(社区开源版)**——本仓库内容,**MIT 许可,免费使用 / 修改 / 商用**。
-- 7 个核心程序(取数 / 撒网 / 补词 / 查漏 / 完整性 / 跨文件 / Excel)
+- 8 个核心程序(取数 / 撒网 / 补词×2 / 查漏 / 完整性 / 跨文件 / Excel) + 一键编排脚本
 - 基础判词库(约 100 词,覆盖通用否决/废标信号)
 - 4 类常见标书的类型特化规则(工程·合理低价 / 货物·综合评分 / 政采服务 / 央企货物,并入审标对照清单)
 - 完整的两层防线 + 红蓝对抗方法论
@@ -78,12 +78,15 @@ python scripts/build_excel.py 输出.xlsx workspace/<项目>.工作区.md [其�
 
 ```
 tender-review-kit/
+├── QUICKSTART.md         # 30 秒上手指南
 ├── SKILL.md              # skill 入口 + 端到端工作流(7步)
 ├── ARCHITECTURE.md       # 设计纲领(六层栈 + Python/LLM 分工 + 数据驱动)
+├── run_pipeline.py       # 一键编排: prep(取数+扫描) / verify(护栏+Excel)
 ├── scripts/              # 程序层(确定性 + 护栏,纯标准库+少量 pip)
 │   ├── extract_text.py        # 取数: PDF/Word → 带行号文本
 │   ├── scan_keywords.py       # 判词撒网: 5 类判决词命中
-│   ├── scan_candidates.py     # 补词引擎: 扫疑似新判决词
+│   ├── scan_candidates.py     # 补词引擎(程序通道): 正则扫疑似新判决词
+│   ├── harvest_ai_words.py    # 补词引擎(AI通道): 收割 AI 判断阶段发现的疑似判词
 │   ├── check_coverage.py      # 反向校验: 命中是否被废标清单覆盖
 │   ├── check_completeness.py  # 完整性: 条数/梯度/▲ 覆盖
 │   ├── cross_doc.py           # 跨文件矛盾: 金额/日期/数量

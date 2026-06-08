@@ -52,8 +52,9 @@ Grep 章节标题,定位 4 必扫产物的**行号范围**:投标人须知 / 评
 **关键认知**(开源贡献者必看):
 - `scan_keywords` = 用现有通缉令抓人 → **为当前办案**
 - `scan_candidates` = 顺手记下长得像通缉犯但不在令上的人 → **更新通缉令,为以后办案**
-- 两者**逻辑独立**,候选词审核入库后**不回过来影响当前审标结论**(当前已跑过 scan_keywords)
-- **"当前标书不漏"靠两层防线(§6),不靠 scan_candidates**;补词引擎是为整个项目"判词库自己长大"的副业齿轮,等空时批量审、入库,下次审新标书时自动用上更大的词库。
+- 两者**逻辑独立**,候选词审核入库后供下次扫描使用(当前标书已跑过 scan_keywords)
+- **"当前标书不漏"靠三道保险**:① 两层防线(§6)防漏抄 ② AI 在 Step 5 判断时发现的新判决词直接纳入当前清单(标 `[AI发现]`) ③ 同时上报到 `## AI发现疑似判词`,由 `harvest_ai_words.py` 收割进候选库,人审入库后**下次标书自动扫到**。
+- `scan_candidates` + AI 上报 = 两条补词通道(程序正则 + AI 语义),判词库从两个方向长大。
 
 ### 4. 建工作区
 `workspace/<项目>.工作区.md`:项目元信息 + 第 2 步的章节行号 + 商务/技术分区。
@@ -67,6 +68,21 @@ Grep 章节标题,定位 4 必扫产物的**行号范围**:投标人须知 / 评
 > 纪律:每个专项只读自己一片、写工作区、不背前序上下文(线性也不爆 token);并行态用 subagent,二者读同一套 references、同一套 data。
 
 > ⭐ **输出结构规范(所有专项必守)**:**主清单 Markdown 表格放在 `## 专项标题` 正下方,不要嵌进 `### 子节`**。说明性内容(台账/对照核验/特化对照/发现/建议/边界)用 `### 子节`,程序会跳过其表格。否则护栏会漏数,Excel 也转不进对应 sheet。
+
+> ⭐ **AI 发现疑似判词(所有专项必守)**:读条款时如果遇到**具有判决效力但 hits.json 未命中**的语言(如"取消中标资格""视为虚假应标""不列入合格名单"等),必须做两件事:
+> 1. **纳入当前清单**:写进对应专项的主清单表格,出处列标注 `[AI发现]`——不能因为不在判词库就丢掉。
+> 2. **上报候选词**:在工作区 md **最末尾**追加 `## AI发现疑似判词` section,用标准表格列出:
+>
+> ```markdown
+> ## AI发现疑似判词
+>
+> | 疑似判词 | 原文摘要 | 出处 | 建议分类 |
+> |----------|----------|------|----------|
+> | 取消中标资格 | 若发现围标串标行为,取消中标资格 | 行156 | primary/bid_phase |
+> ```
+>
+> 建议分类格式:`类别/scope`(类别=primary/secondary/customization/certifications;scope=bid_phase/evaluation_phase/contract_phase)。
+> 验证阶段 `harvest_ai_words.py` 会自动收割这些词进候选库,走 `promote_candidates.py` 人审后入库 `keywords.json`——**当前标书不漏,未来标书自动扫到**。
 
 ### 6. 两层护栏　[防漏命根子]
 **第一层 · 程序(防"漏抄")**:
@@ -93,8 +109,9 @@ Grep 章节标题,定位 4 必扫产物的**行号范围**:投标人须知 / 评
 ## 文件地图
 
 ```
-scripts/    extract_text✓ scan_keywords✓(为当前) scan_candidates✓(为未来,补词)
-            check_coverage✓ check_completeness✓ cross_doc✓(跨文件矛盾) build_excel✓
+scripts/    extract_text✓ scan_keywords✓(为当前) scan_candidates✓(为未来,程序补词)
+            harvest_ai_words✓(收割AI发现) check_coverage✓ check_completeness✓
+            cross_doc✓(跨文件矛盾) build_excel✓
 references/ disqualification-checklist✓(审标对照总清单:废标点+隐性门槛+类型特化+必拿字段)
             commercial/ disqualification✓ scoring✓ certifications-roster✓ timeline✓
             technical/  essential-response✓ scoring✓ spec-deviation✓

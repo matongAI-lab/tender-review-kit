@@ -98,6 +98,9 @@ def verify(worklist_file, out_xlsx):
     stem = worklist.stem.replace(".工作区", "")
     hits_file = ws_dir / (stem + ".hits.json")
 
+    run([SCRIPTS / "harvest_ai_words.py", str(worklist)],
+        "Step 5+ · 收割：AI 发现的疑似判词 → 候选库")
+
     if hits_file.exists():
         run([SCRIPTS / "check_coverage.py", str(hits_file), str(worklist)],
             "Step 6a · 查漏：撒网命中 vs 废标清单覆盖反查")
