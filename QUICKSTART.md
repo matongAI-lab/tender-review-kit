@@ -1,5 +1,7 @@
 # 30 秒上手
 
+> 把一份**招标文件**喂进去 → 拿到一份给你（投标人）的**投标核对清单**。
+
 ## 1. 装依赖（一次）
 
 需要 Python 3.8+。没装过的去 [python.org](https://www.python.org/downloads/) 下载安装，勾选 "Add to PATH"。

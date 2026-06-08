@@ -28,6 +28,15 @@ _decisions_*.txt
 data/candidates.json
 *.candidates.json
 
+# 用户本地词库(每个用户审标过程中积累的私有判词,不进仓库)
+# 通过 export_contribution.py 选择性贡献给开源 keywords.json
+data/local_keywords.json
+*.hits.v2.json
+*.pending_words.json
+
+# export_contribution.py 导出的临时贡献文件(本地预览用,贡献后可删)
+/contribution.md
+
 # 开发期私人记录(开源仓库不带)
 OPEN_TASKS.md
 

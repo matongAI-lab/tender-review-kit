@@ -42,6 +42,7 @@ def load_existing_words():
 
 
 def load_candidates(paths):
+    """从 candidates.json（程序补词）合并去重"""
     all_candidates = {}
     for p in paths:
         try:
@@ -67,6 +68,39 @@ def load_candidates(paths):
     return list(all_candidates.values())
 
 
+def load_local_keywords():
+    """从用户本地词库（AI 发现已直接入库的词）读出贡献候选"""
+    local_path = BASE / "data" / "local_keywords.json"
+    if not local_path.exists():
+        return []
+    try:
+        data = json.loads(local_path.read_text(encoding="utf-8"))
+    except (json.JSONDecodeError, OSError):
+        return []
+
+    out = []
+    for cat in data.get("categories", []):
+        cid = cat.get("id", "primary")
+        for w in cat.get("words", []):
+            if isinstance(w, dict):
+                out.append({
+                    "word": w["word"],
+                    "scope": w.get("scope", []),
+                    "category": cid,
+                    "source": "local_keywords(ai_discovery)",
+                    "count": 1,
+                })
+            else:
+                out.append({
+                    "word": w,
+                    "scope": [],
+                    "category": cid,
+                    "source": "local_keywords(ai_discovery)",
+                    "count": 1,
+                })
+    return out
+
+
 def build_markdown(candidates):
     lines = []
     lines.append("## 判词贡献 / Keyword Contribution")
@@ -77,9 +111,15 @@ def build_markdown(candidates):
     lines.append("| 判词 | 建议分类 | 建议 scope | 发现方式 | 出现次数 |")
     lines.append("|------|----------|------------|----------|----------|")
     for c in sorted(candidates, key=lambda x: (-x["count"], x["word"])):
-        source_label = "AI语义" if "ai" in c["source"] else "正则模式"
-        if "+" in c["source"]:
+        src = c["source"]
+        if "local_keywords" in src and "pattern" in src:
+            source_label = "AI发现+程序补词"
+        elif "local_keywords" in src or "ai_discovery" in src or "ai" in src:
+            source_label = "AI语义发现"
+        elif "+" in src:
             source_label = "正则+AI"
+        else:
+            source_label = "正则模式"
         lines.append("| %s | %s | %s | %s | %d |"
                       % (c["word"], c["category"],
                          "/".join(c["scope"]) if c["scope"] else "—",
@@ -170,35 +210,54 @@ def main():
     args = sys.argv[1:]
     mode = "file"
     paths = []
+    skip_local = False
 
     for a in args:
         if a == "--github":
             mode = "github"
         elif a == "--pr":
             mode = "pr"
+        elif a == "--no-local":
+            skip_local = True
         else:
             paths.append(a)
 
+    # 两个来源：候选库（程序补词通道）+ 本地词库（AI 发现通道）
     if not paths:
         ws = BASE / "workspace"
         if ws.exists():
             paths = [str(p) for p in ws.glob("*.candidates.json")]
-        if not paths:
-            print("用法: python export_contribution.py <candidates.json ...> [--github|--pr]")
-            print("  或: cd 项目根目录, workspace/ 下有 candidates.json 时直接跑")
-            sys.exit(1)
 
     existing = load_existing_words()
-    candidates = load_candidates(paths)
+    candidates = load_candidates(paths) if paths else []
+    local_words = [] if skip_local else load_local_keywords()
 
-    new = [c for c in candidates if c["word"] not in existing]
+    # 合并两个来源，去重
+    by_word = {}
+    for c in candidates + local_words:
+        if c["word"] in by_word:
+            if "local_keywords" in c["source"] and "ai" not in by_word[c["word"]]["source"]:
+                by_word[c["word"]]["source"] += "+local_keywords"
+            continue
+        by_word[c["word"]] = c
+
+    all_words = list(by_word.values())
+
+    if not all_words:
+        print("没有找到任何待贡献的词（workspace 无 candidates.json，data/local_keywords.json 也不存在）")
+        sys.exit(1)
+
+    new = [c for c in all_words if c["word"] not in existing]
 
     if not new:
-        print("✓ 所有候选词已在 keywords.json 中，无需贡献。")
+        print("✓ 所有候选词已在开源 keywords.json 中，无需贡献。")
         return
 
-    print("候选词: %d 个（来自 %d 个文件），其中 %d 个是新词（不在 keywords.json 中）"
-          % (len(candidates), len(paths), len(new)))
+    print("待贡献来源汇总：")
+    print("  - 候选库(candidates.json) %d 个文件 / %d 词" % (len(paths), len(candidates)))
+    print("  - 本地词库(local_keywords.json) %d 词" % len(local_words))
+    print("  合并去重后 %d 词，其中 %d 个是新词（开源库未收录）"
+          % (len(all_words), len(new)))
 
     md = build_markdown(new)
 

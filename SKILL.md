@@ -1,12 +1,15 @@
 ---
 name: tender-review-skill
-description: 投标审核 / bid review。拿到招标文件(PDF/Word)→产出投标核对清单(废标项+评分项+证明材料+▲标识参数+时间节点)。当用户给出招标文件要审、问废标点/否决条款/评分项/资格要求,或要做投标合规自检时使用——即使没明说"审核"。产清单和事实,不下"投/不投"结论。Use when analyzing Chinese tender documents: extract disqualification/scoring items, required materials, ▲-marked parameters, with line-numbered evidence.
+description: 招标文件审标 / tender document review for bidders。审的是招标方发的招标文件(PDF/Word),服务的是要去投标的人。输出投标核对清单(废标项+评分项+证明材料+▲标识参数+时间节点),帮投标人在动手写投标文件之前把游戏规则吃透。当用户给出招标文件要审、问废标点/否决条款/评分项/资格要求,或要做投标前合规自检时使用——即使没明说"审核"。产清单和事实,不下"投/不投"结论。Use when analyzing Chinese tender/RFP documents for bidders: extract disqualification/scoring items, required materials, ▲-marked parameters, with line-numbered evidence.
 ---
 
-# 投标审核 tender-review-skill
+# 招标文件审标 tender-review-skill
 
-拿一份招标文件,产出「投标核对清单」——帮投标人在递交前发现合规风险、估算得分、列齐要准备的材料。
-- 产出 = **清单 + 事实**(每条带原文出处行号),**不下"投/不投"结论**。
+**审的是招标方发的招标文件,服务的是要去投标的人。**
+
+输入一份招标文件 → 产出「投标核对清单」——帮投标人在**动手写投标文件之前**,看清楚招标方的所有要求(哪些不达标会被废、哪些是评分点、要准备什么材料、哪些 ▲ 参数必须响应、哪些时间节点不能错)。
+
+- 产出 = **清单 + 事实**(每条带原文出处行号),**不下"投/不投"结论**——决策是投标人自己的事。
 - **工具无关主干**(任何 agent 工具能跑) + **Claude 增强**(subagent 并行 / 红蓝对抗)。
 - 架构全貌见 `ARCHITECTURE.md`。
 
@@ -82,7 +85,42 @@ Grep 章节标题,定位 4 必扫产物的**行号范围**:投标人须知 / 评
 > ```
 >
 > 建议分类格式:`类别/scope`(类别=primary/secondary/customization/certifications;scope=bid_phase/evaluation_phase/contract_phase)。
-> 验证阶段 `harvest_ai_words.py` 会自动收割这些词进候选库,走 `promote_candidates.py` 人审后入库 `keywords.json`——**当前标书不漏,未来标书自动扫到**。
+
+### 5.5. 列出待审新词　[程序,自动跑]
+`python scripts/harvest_ai_words.py <工作区.md>` (verify 阶段自动调用)
+解析 `## AI发现疑似判词` 表格 → 写 `workspace/<项目>.pending_words.json`(**待审清单,尚未入库**)→ 打印每个词的建议分类、scope、原文片段。
+
+### 5.6. AI 对话,请用户拍板　[Claude 询问]
+**关键:AI 发现的词不能默默入库**——AI 判断可能漏估语境("无效投标"vs"无效数据"),用户最了解自己领域,必须由用户拍板。
+
+AI 用自然对话告知用户:
+
+> 本次审标我发现了 N 个 hits.json 没覆盖、但具有判决效力的语言:
+> 1. **不接受联合体投标**(建议 primary/bid_phase,行9)
+> 2. **取消中标资格**(建议 primary/bid_phase,行156)
+> ...
+>
+> 这些词如果加入你的**本地词库**(只存你机器上,不传任何地方),下次扫别的标书会自动扫到。**你看哪些要接受?**
+>
+> - 全部接受 → 我帮你跑 `--accept-all`
+> - 部分接受 → 告诉我哪几个(比如"接受第 1、3 个")
+> - 全部拒绝 → 跑 `--reject-all`
+
+用户答复后,AI 调用:
+- 全接受:`python scripts/harvest_ai_words.py <工作区.md> --accept-all`
+- 部分:`python scripts/harvest_ai_words.py <工作区.md> --accept "词A,词B"`
+- 全拒绝:`python scripts/harvest_ai_words.py <工作区.md> --reject-all`
+
+接受的词进 `data/local_keywords.json`(gitignored)。
+
+### 5.7. 自动回扫 + AI 补漏　[程序 + Claude 判断]
+`--accept-all`/`--accept` 命令**自动触发回扫**:用合并后的词库重扫 lines.txt → diff 新旧 hits → 报出"因新词而新增的命中行"。
+
+AI 看新增命中,逐条判断:
+- **是新废标点 / 评分项 / 标识项** → 补到工作区对应清单(出处标 `[新词补扫]`)。
+- **是误命中**(语境不同) → 跳过,但记录原因。
+
+> 5.5+5.6+5.7 闭环的意义:AI 在 Step 5 只读了自己负责的章节,发现的新词可能在文件其他位置也出现。**用户拍板**(避免本地库被污染)+ **回扫**(当前标书不漏)+ **本地积累**(下次自动扫到)。
 
 ### 6. 两层护栏　[防漏命根子]
 **第一层 · 程序(防"漏抄")**:
@@ -94,18 +132,23 @@ Grep 章节标题,定位 4 必扫产物的**行号范围**:投标人须知 / 评
 ### 7. 出报告　[程序]
 `python scripts/build_excel.py <out.xlsx> <各专项 md...>` → 多 sheet Excel(废标红 / 评分绿 / ▲橙 / 证明紫 / 时间蓝,冻结首行、可筛选)。另存一份 Markdown 总览。
 
-### 8. 收尾：贡献新判词（可选）　[Claude 询问]
-出完 Excel 后,检查本次流程是否产生了新候选词（`workspace/<项目>.candidates.json` 是否存在且非空）。如果有,**用自然对话告知用户,并引导贡献**:
+### 8. 收尾：开源词库的互惠机制（可选）　[Claude 询问]
+出完 Excel 后,检查 `data/local_keywords.json` 是否存在且非空（本次或历次审标接受入库的词）。如果有,**用自然对话告知用户**:
 
-> 本次审标发现了 X 个新判词（如"取消中标资格""不接受联合体投标"等）。
+> 这次你接受入库的判词(像"取消中标资格""不接受联合体投标"这种),已经留在你的本地词库里——下次扫别的标书会自动用上。
 >
-> tender-review-kit 是开源项目,判词库是所有用户共同积累的公共资产——**你今天发现的词,会帮到明天用这个工具的每一个人**。目前词库 108 词,每一个贡献者多加几个,很快就能覆盖更多行业和标书类型。
+> 想不想让其中**普遍适用**的词也进入开源 keywords.json?这个项目的判词库就是大家一起攒的——
 >
-> 提交很简单,只需要我帮你跑一条命令。**只导出词本身,不含你的标书原文,完全脱敏**。要帮你提交吗？
+> - 你今天贡献几个词,**别人下次更新时也能用上你的发现**
+> - 别人今天贡献几个词,**你下次 `git pull` 后也能直接用**
+>
+> 你的本地词库**永远是你自己的**(下次审标 AI 还会发现新词,继续往里加),而开源词库是公共的——**只有你 follow 这个项目并定期拉取,才能享受大家一起攒的成果**。
+>
+> 完全自愿。要把这些词加进开源吗?
 
-- 用户说好 → 跑 `python scripts/export_contribution.py workspace/<项目>.candidates.json --github`(自动创建 GitHub Issue)。如果没装 gh CLI,改用 `export_contribution.py`(无 --github)导出文件,告诉用户粘贴到 https://github.com/matongAI-lab/tender-review-kit/issues/new
-- 用户说不 → 正常结束,不再提
-- **只问一次,不纠缠;语气是邀请,不是催促**
+- 用户说好 → 跑 `python scripts/export_contribution.py --github`(自动从 `data/local_keywords.json` 读取并创建 GitHub Issue)。如果没装 gh CLI,改用 `export_contribution.py`(无 --github)导出文件,告诉用户粘贴到 https://github.com/matongAI-lab/tender-review-kit/issues/new
+- 用户说不 → 正常结束,不再提。**也顺便告诉用户:即使不贡献,follow 仓库 + 定期 `git pull` 就能持续拿到别人贡献的更新**。
+- **只问一次,不纠缠;语气是平等的、说明机制,不是请求**
 
 ## 两层防线 + 质量旋钮(核心方法论)
 

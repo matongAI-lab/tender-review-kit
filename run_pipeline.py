@@ -121,19 +121,32 @@ def verify(worklist_file, out_xlsx):
              "Step 7 · 出 Excel")
 
     if ok:
-        candidates_file = ws_dir / (stem + ".candidates.json")
+        pending_file = ws_dir / (stem + ".pending_words.json")
+        local_kw_file = SCRIPTS.parent / "data" / "local_keywords.json"
         print("\n" + "=" * 60)
         print("✓ verify 完成！")
         print("  Excel: %s" % out_xlsx)
         print("  如有护栏 warning，回去让 agent 补漏后重跑 verify。")
-        if candidates_file.exists():
+
+        if pending_file.exists():
             print()
-            print("  本次发现了新判词！tender-review-kit 是开源项目，判词库靠每个用户一起攒——")
-            print("  你今天发现的词，会帮到明天用这个工具的每一个人。")
+            print("⚠  AI 发现了一些新判词，已生成待审清单【尚未入库】：")
+            print("    %s" % pending_file)
             print()
-            print("  贡献很简单（只导出词，不含标书原文，完全脱敏）：")
-            print("    python scripts/export_contribution.py          # 导出贡献文件")
-            print("    python scripts/export_contribution.py --github  # 一键提 Issue（需 gh CLI）")
+            print("  请审批后再跑贡献:")
+            print("    python scripts/harvest_ai_words.py %s --accept-all" % worklist)
+            print("    （或 --accept \"词A,词B\" / --reject-all）")
+
+        if local_kw_file.exists():
+            print()
+            print("  你接受入库的判词已留在本地,下次扫别的标书会自动用上。")
+            print()
+            print("  这个项目的开源词库是大家一起攒的——你贡献几个,以后别人贡献的你也能拉到。")
+            print("  只要 follow 仓库 + 定期 git pull,就能享受其他用户的发现。")
+            print()
+            print("  把你这些词加进开源 keywords.json:")
+            print("    python scripts/export_contribution.py --github  # 一键提 Issue")
+            print("    python scripts/export_contribution.py           # 先导出预览(脱敏,不含原文)")
 
 
 def main():

@@ -126,6 +126,27 @@ def scan(lines, kw):
     return hits, detected, counts
 
 
+def _merge_keywords(base_kw, local_kw):
+    """把本地库 categories 的 words 合并进基础库（同 category id 去重合并）"""
+    base_cats = {c["id"]: c for c in base_kw.get("categories", [])}
+    for lc in local_kw.get("categories", []):
+        cid = lc.get("id")
+        if not cid:
+            continue
+        if cid in base_cats:
+            existing_words = set()
+            for w in base_cats[cid].get("words", []):
+                existing_words.add(w["word"] if isinstance(w, dict) else w)
+            for w in lc.get("words", []):
+                wkey = w["word"] if isinstance(w, dict) else w
+                if wkey not in existing_words:
+                    base_cats[cid].setdefault("words", []).append(w)
+                    existing_words.add(wkey)
+        else:
+            base_kw.setdefault("categories", []).append(lc)
+    return base_kw
+
+
 def main():
     ap = argparse.ArgumentParser(description="判决词撒网：带行号文本 → 命中清单")
     ap.add_argument("lines_file")
@@ -138,9 +159,19 @@ def main():
         print("ERROR file_not_found:", lines_path)
         sys.exit(1)
 
-    kw_path = (Path(args.keywords) if args.keywords
-               else Path(__file__).resolve().parent.parent / "data" / "keywords.json")
+    base = Path(__file__).resolve().parent.parent
+    kw_path = Path(args.keywords) if args.keywords else base / "data" / "keywords.json"
     kw = json.load(open(kw_path, encoding="utf-8"))
+
+    # 合并本地词库（用户私有积累，gitignored）
+    local_path = base / "data" / "local_keywords.json"
+    if not args.keywords and local_path.exists():
+        try:
+            local = json.load(open(local_path, encoding="utf-8"))
+            kw = _merge_keywords(kw, local)
+            print("[已合并本地词库 %s]" % local_path.name)
+        except (json.JSONDecodeError, KeyError) as e:
+            print("⚠ 本地词库解析失败，跳过：%s" % e)
 
     lines = load_lines(lines_path)
     hits, detected, counts = scan(lines, kw)

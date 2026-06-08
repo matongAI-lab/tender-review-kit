@@ -74,7 +74,10 @@ def main():
         sys.exit(1)
     lines_file = WS / (STEM + ".lines.txt")
     hits_file = WS / (STEM + ".hits.json")
-    if not run([str(KIT / "scripts" / "scan_keywords.py"), str(lines_file)], errors):
+    # 显式指定开源词库,避免本地词库 local_keywords.json 影响测试可重复性
+    open_kw = KIT / "data" / "keywords.json"
+    if not run([str(KIT / "scripts" / "scan_keywords.py"), str(lines_file),
+                "--keywords", str(open_kw)], errors):
         sys.exit(1)
 
     # 1. 取数基线
