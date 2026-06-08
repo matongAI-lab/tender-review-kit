@@ -15,12 +15,14 @@
 
 ## 版本路线
 
-**当前版本:Community Edition(社区开源版)**——本仓库内容,**MIT 许可,免费使用 / 修改 / 商用**。
-- 8 个核心程序(取数 / 撒网 / 补词×2 / 查漏 / 完整性 / 跨文件 / Excel) + 一键编排脚本
-- 基础判词库(约 100 词,覆盖通用否决/废标信号)
+**当前版本:Community Edition v0.1.3(社区开源版)**——本仓库内容,**MIT 许可,免费使用 / 修改 / 商用**。
+- 8 个核心程序(取数 / 撒网 / 补词×2 / 查漏 / 完整性 / 跨文件 / Excel) + 一键编排 `run_pipeline.py`
+- **判词库分两层**:开源词库(共享,~108 词)+ 用户本地词库(私有积累,gitignored)
+- **AI 发现新词的用户审批流**:不再自动入库,用户拍板决定是否接受
+- **互惠贡献闭环**:你贡献几个,以后别人贡献的你也能拉到
 - 4 类常见标书的类型特化规则(工程·合理低价 / 货物·综合评分 / 政采服务 / 央企货物,并入审标对照清单)
 - 完整的两层防线 + 红蓝对抗方法论
-- **够用,但你要的"省心 / 不漏 / 跨行业"得自己往里加**
+- **够用,但你要的"省心 / 不漏 / 跨行业"得靠社区一起攒(欢迎贡献)**
 
 **规划中:Professional Edition(专业版,正在开发)**——商业产品,不在本仓库:
 - **更全的判词库**:几百至上千词,带行业细分 scope(医疗 / 军工 / 海外 / 科研…)和实战准确率证明
@@ -51,29 +53,34 @@
 
 ## 5 分钟上手
 
+> 详细版见 [QUICKSTART.md](QUICKSTART.md)。下面是最短路径。
+
 ```bash
-# 1. 装依赖
+# 1. 装依赖(一次,需要 Python 3.8+)
 pip install -r requirements.txt
-# (PDF 提取需要 pdftotext, Windows 装 xpdf-tools, mac: brew install poppler, ubuntu: apt install poppler-utils)
+# (PDF 提取建议装 pdftotext: Windows xpdf-tools / mac brew install poppler / ubuntu apt install poppler-utils。不装也能跑,自动回退 pypdf)
 
-# 2. 取数:招标文件 → 带行号文本
-python scripts/extract_text.py <招标文件.docx 或 .pdf> --outdir workspace
+# 2. 程序自动跑(取数 + 撒网 + 补词,几秒)
+python run_pipeline.py prep <招标文件.docx 或 .pdf>
 
-# 3. 判词撒网:扫 5 类判决词信号
-python scripts/scan_keywords.py workspace/<项目>.lines.txt
+# 3. 把 prep 结尾打印的那段提示发给你的 AI agent(Claude / Codex / Workbuddy 等)
+#    → agent 按 SKILL.md 步骤产出 workspace/<项目>.工作区.md
+#    → 含 AI 新发现的疑似判词(标 [AI发现])
 
-# 4. 补词引擎:扫"像判决词、未入库"的新词到候选区
-#    → workspace/<项目>.candidates.json(含原文片段,留在本地、不进仓库)
-python scripts/scan_candidates.py workspace/<项目>.lines.txt --hits workspace/<项目>.hits.json
+# 4. 程序自动跑(护栏 + 出 Excel,几秒)
+python run_pipeline.py verify workspace/<项目>.工作区.md
 
-# 5. 让 agent(Claude/Codex/国产)按 SKILL.md 流程整理清单,落到 workspace/<项目>.工作区.md
+# 5. 如果 AI 发现了新判词,审批是否接受
+python scripts/harvest_ai_words.py workspace/<项目>.工作区.md --accept-all
+#    (接受的进 data/local_keywords.json 用户本地积累,下次扫别的标书自动用上)
 
-# 6. 两道护栏
-python scripts/check_coverage.py workspace/<项目>.hits.json workspace/<项目>.工作区.md
-python scripts/check_completeness.py workspace/<项目>.工作区.md --hits workspace/<项目>.hits.json
+# 6. (可选) 把普遍适用的新词加进开源词库,以后别人贡献的你也能拉到
+python scripts/export_contribution.py --github
+```
 
-# 7. 出 Excel
-python scripts/build_excel.py 输出.xlsx workspace/<项目>.工作区.md [其他专项 md...]
+**自带 sample 试跑**(不需要真标书):
+```bash
+python run_pipeline.py prep tests/fixtures/sample_tender.docx
 ```
 
 ## 项目结构
@@ -86,15 +93,18 @@ tender-review-kit/
 ├── run_pipeline.py       # 一键编排: prep(取数+扫描) / verify(护栏+Excel)
 ├── scripts/              # 程序层(确定性 + 护栏,纯标准库+少量 pip)
 │   ├── extract_text.py        # 取数: PDF/Word → 带行号文本
-│   ├── scan_keywords.py       # 判词撒网: 5 类判决词命中
+│   ├── scan_keywords.py       # 判词撒网: 自动合并加载开源 + 本地词库
 │   ├── scan_candidates.py     # 补词引擎(程序通道): 正则扫疑似新判决词
-│   ├── harvest_ai_words.py    # 补词引擎(AI通道): 收割 AI 判断阶段发现的疑似判词
+│   ├── harvest_ai_words.py    # 补词引擎(AI通道): AI 发现的词 → 待审 → 用户拍板 → 入本地库 + 回扫
+│   ├── promote_candidates.py  # 候选词审批入库(scan_candidates 产物)
+│   ├── export_contribution.py # 脱敏导出本地新词 → 开源 keywords.json(一键提 Issue)
 │   ├── check_coverage.py      # 反向校验: 命中是否被废标清单覆盖
 │   ├── check_completeness.py  # 完整性: 条数/梯度/▲ 覆盖
 │   ├── cross_doc.py           # 跨文件矛盾: 金额/日期/数量
 │   └── build_excel.py         # md 清单 → 多 sheet Excel
-├── data/                 # 数据层(开源活资产,可 PR)
-│   └── keywords.json          # 判词库 5 类 ⭐ 命根子(候选词在 workspace/,含原文不入库)
+├── data/                 # 数据层
+│   ├── keywords.json          # 开源判词库 5 类 ⭐ 命根子(PR 可改,所有用户共享)
+│   └── local_keywords.json    # 用户本地积累(gitignored,审批入库后下次扫别标书自动用上)
 ├── references/           # 知识层(专项工作指南)
 │   ├── disqualification-checklist.md   # 审标对照总清单(废标点+隐性门槛+类型特化+必拿字段)
 │   ├── commercial/                     # 商务线: 废标/评分/证明/时间
@@ -110,15 +120,16 @@ tender-review-kit/
 - ✅ 用 `export_contribution.py` 把你的词加进开源 → 别人也能用上你的判断
 - ✅ 你的本地词库(`data/local_keywords.json`)永远是你自己的,贡不贡献都在,扫别的标书继续用
 
-**最有价值的贡献 = 扩判词库**（一条命令搞定）:
+**最有价值的贡献 = 扩判词库**:
 ```bash
-# 审完标书后,导出你审批入库的判词(自动脱敏,不含标书原文)
-python scripts/export_contribution.py
+# 1. 审完标书后,审批 AI 发现的词(--accept-all 全收 / --accept "词" 部分收 / --reject-all 全弃)
+python scripts/harvest_ai_words.py workspace/<项目>.工作区.md --accept-all
 
-# 或一键提 Issue 到 GitHub(需装 gh CLI 并登录)
-python scripts/export_contribution.py --github
+# 2. 把本地词库里普遍适用的词加进开源(自动脱敏,不含标书原文)
+python scripts/export_contribution.py            # 导出预览
+python scripts/export_contribution.py --github   # 一键提 Issue(需装 gh CLI 并登录)
 ```
-工具会自动收集两条通道(程序正则 + AI 语义)发现的候选词,去掉原文片段,去重现有词库,生成干净的贡献表。
+工具会同时收集两条通道(程序补词 candidates.json + AI 发现 local_keywords.json),去掉原文片段,去重现有开源词库,生成干净的贡献表。
 
 **其他贡献方向**:
 - 补 references(给审标对照清单加条目 / 补专项工作指南)
@@ -139,10 +150,12 @@ python scripts/export_contribution.py --github
 
 - [x] 端到端跑通(覆盖货物·综合评分、央企货物、政采服务、工程·合理低价多类标书实战验证)
 - [x] A/B 红蓝对抗实验(两个独立 subagent 处理同一份 300+ ▲ 标书,覆盖一条不差,各自逮到对方盲区)
-- [x] 七大程序 + 补词引擎 + 通用机制清单
+- [x] 8 大程序 + 一键编排(`run_pipeline.py`)+ 通用机制清单
+- [x] 判词库分两层(开源共享 + 用户本地积累)+ 互惠贡献闭环(v0.1.3)
+- [x] AI 发现新词的用户审批流(v0.1.3)
 - [ ] 更多类型实战覆盖
 - [ ] 准确率量化(真值标注 + 测试集)
-- [ ] 词库扩展(目标:200+ 判决词)
+- [ ] 词库扩展(目标:200+ 判决词,靠贡献闭环自然生长)
 
 ## License
 
