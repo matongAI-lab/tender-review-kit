@@ -37,6 +37,9 @@ data/local_keywords.json
 # export_contribution.py 导出的临时贡献文件(本地预览用,贡献后可删)
 /contribution.md
 
+# 发布给网盘/用户的本地压缩包
+/release/
+
 # 开发期私人记录(开源仓库不带)
 OPEN_TASKS.md
 

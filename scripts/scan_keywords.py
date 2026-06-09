@@ -69,6 +69,42 @@ def _emph_hit(mark, text):
     return mark in text
 
 
+def _literal_spans(word, text):
+    """Return all literal match spans for word in text."""
+    start = text.find(word)
+    while start != -1:
+        end = start + len(word)
+        yield start, end
+        start = text.find(word, start + 1)
+
+
+def _primary_hits_for_line(prim_words, text):
+    """Prefer longer primary phrases when matches overlap on the same line."""
+    matches = []
+    for w in prim_words:
+        word = w.get("word", "")
+        if not word:
+            continue
+        for start, end in _literal_spans(word, text):
+            matches.append({"entry": w, "word": word, "start": start, "end": end})
+
+    kept = []
+    seen_words = set()
+    for i, m in enumerate(matches):
+        nested_in_longer = any(
+            i != j
+            and len(other["word"]) > len(m["word"])
+            and m["start"] >= other["start"]
+            and m["end"] <= other["end"]
+            for j, other in enumerate(matches)
+        )
+        if nested_in_longer or m["word"] in seen_words:
+            continue
+        kept.append(m["entry"])
+        seen_words.add(m["word"])
+    return kept
+
+
 def scan(lines, kw):
     cats = kw["categories"]
     global_excl = [re.compile(p) for p in kw.get("exclude_patterns_global", [])]
@@ -102,10 +138,9 @@ def scan(lines, kw):
     for no, text in lines:
         if not text.strip() or excluded(text):
             continue
-        for w in prim_words:
-            if w["word"] in text:
-                hits["primary"].append({"line": no, "word": w["word"],
-                                        "scope": w.get("scope", []), "text": text[:160]})
+        for w in _primary_hits_for_line(prim_words, text):
+            hits["primary"].append({"line": no, "word": w["word"],
+                                    "scope": w.get("scope", []), "text": text[:160]})
         for w in sec_words:
             if w in text:
                 hits["secondary"].append({"line": no, "word": w, "text": text[:160]})

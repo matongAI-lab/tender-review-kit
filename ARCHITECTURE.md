@@ -106,7 +106,7 @@ A/B 红蓝对抗怎么做:关键专项派**两个独立 subagent**各做一遍,�
 |---|---|
 | 编排 | SKILL.md(中文端到端 7 步 + 两层防线 + 质量旋钮) |
 | 程序 | extract_text / scan_keywords / scan_candidates / harvest_ai_words / check_coverage / check_completeness / cross_doc / build_excel |
-| 数据 | keywords.json(108 词) ; 候选词在 workspace/<项目>.candidates.json(含原文,不入库,promote 时只转词+scope) |
+| 数据 | keywords.json(120+ 词) ; 候选词在 workspace/<项目>.candidates.json(含原文,不入库,promote 时只转词+scope) |
 | 知识 | disqualification-checklist(审标对照总清单) + commercial × 4 + technical × 3 |
 | 反哺 | cases / tests 基础 |
 

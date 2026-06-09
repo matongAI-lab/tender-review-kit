@@ -56,7 +56,7 @@ try:
     lf = TMP/"qa_x.lines.txt"
     run([SC/"scan_keywords.py", lf, "--out", TMP/"qa_x.hits.json"])
     H = json.load(open(TMP/"qa_x.hits.json", encoding="utf-8")); s = H["summary"]
-    ok("scan: fixture 一级判决词≥15", s["primary"] >= 15, str(s["primary"]))
+    ok("scan: fixture 一级判决词≥12(长词优先去噪后)", s["primary"] >= 12, str(s["primary"]))
     ok("scan: fixture 关系门槛≥6", s["customization"] >= 6, str(s["customization"]))
     ok("scan: fixture 证明文件≥5", s["certifications"] >= 5, str(s["certifications"]))
     ok("scan: fixture ▲ 被识别", "▲" in H["detected_emphasis_marks"])
@@ -74,6 +74,9 @@ try:
     ok("scan: * 乘号/加粗/脚注不误报", "*" not in detected([(1,"算 3*5"),(2,"**加粗**"),(3,"见备注* 后文")], "t_starneg"))
     run([SC/"scan_keywords.py", lines_file("excl.lines.txt", [(1,"第三章 否决与无效情形"),(2,"目 录 否决")]), "--out", TMP/"excl.hits.json"])
     ok("scan: 第X章/目录行被排除", json.load(open(TMP/"excl.hits.json", encoding="utf-8"))["summary"]["primary"] == 0)
+    run([SC/"scan_keywords.py", lines_file("longest.lines.txt", [(1,"供应商按照无效投标处理")]), "--out", TMP/"longest.hits.json"])
+    lw = [h["word"] for h in json.load(open(TMP/"longest.hits.json", encoding="utf-8"))["hits"]["primary"]]
+    ok("scan: primary 同行重叠命中长词优先", lw == ["按照无效投标处理"], str(lw))
 
     # ============ scan_candidates.py ============
     kw_before = len(json.load(open(KIT/"data"/"keywords.json", encoding="utf-8"))["categories"][0]["words"])

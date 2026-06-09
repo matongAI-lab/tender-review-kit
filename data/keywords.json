@@ -1,7 +1,7 @@
 {
   "version": "2.0",
   "_edition": "Community Edition · 开源基础词库",
-  "_about": "本词库约 100 词,覆盖通用否决/废标/无效/视为/拒收 等核心判决信号。够基本扫描,不够细分场景。Professional Edition 含几百至上千词 + 行业细分 scope(医疗/军工/海外/科研等)+ 实战准确率证明,见 README 路线图。",
+  "_about": "本词库约 120+ 词,覆盖通用否决/废标/无效/拒收/取消资格/评分失分/价格包含/送达程序 等核心信号。够基本扫描,不够细分场景。Professional Edition 含几百至上千词 + 行业细分 scope(医疗/军工/海外/科研等)+ 实战准确率证明,见 README 路线图。",
   "_contributing": "扫到新词?跑 scan_candidates.py → 候选区 → promote_candidates.py 审入库 → 提 PR。",
   "_scope_doc": "scope 取值:bid_phase=投标阶段(递交前)/ evaluation_phase=评标程序 / contract_phase=合同履行期 / customization=商务定制",
   "categories": [
@@ -12,6 +12,7 @@
       "match_type": "literal",
       "scope_required": true,
       "report_section": "三、判决词扫描（一级）",
+      "_doc": "进入查漏护栏的强判决信号。只收稳定动作词;截断句、上下文句、纯声明句不直接入 primary。",
       "words": [
         {
           "word": "否决",
@@ -279,6 +280,70 @@
           "scope": [
             "bid_phase"
           ]
+        },
+        {
+          "word": "不予接收",
+          "scope": [
+            "bid_phase",
+            "evaluation_phase"
+          ]
+        },
+        {
+          "word": "取消参与政府采购项目资格",
+          "scope": [
+            "bid_phase",
+            "evaluation_phase"
+          ]
+        },
+        {
+          "word": "取消投标或者中标资格",
+          "scope": [
+            "bid_phase",
+            "evaluation_phase"
+          ]
+        },
+        {
+          "word": "按否决投标处理",
+          "scope": [
+            "evaluation_phase"
+          ]
+        },
+        {
+          "word": "按照无效投标处理",
+          "scope": [
+            "evaluation_phase"
+          ]
+        },
+        {
+          "word": "按无效标处理",
+          "scope": [
+            "evaluation_phase"
+          ]
+        },
+        {
+          "word": "视为主动放弃本次中标",
+          "scope": [
+            "bid_phase"
+          ]
+        },
+        {
+          "word": "视为无效业绩",
+          "scope": [
+            "evaluation_phase"
+          ]
+        },
+        {
+          "word": "视为无效标",
+          "scope": [
+            "bid_phase",
+            "evaluation_phase"
+          ]
+        },
+        {
+          "word": "视为已包含在总投标价中",
+          "scope": [
+            "bid_phase"
+          ]
         }
       ]
     },
@@ -289,6 +354,7 @@
       "match_type": "literal",
       "scope_required": false,
       "report_section": "四、判决词扫描（二级）",
+      "_doc": "评分失分、价格扣减、保证金、送达/默认同意等高风险提示;不进入废标覆盖强校验。",
       "words": [
         "不得",
         "不允许",
@@ -299,7 +365,12 @@
         "没收保证金",
         "得0分",
         "得零分",
-        "不得分"
+        "不得分",
+        "不予计分",
+        "不予扣除",
+        "不予核减",
+        "视为同意评标结论",
+        "视为送达"
       ]
     },
     {

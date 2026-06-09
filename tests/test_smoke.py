@@ -27,8 +27,8 @@ STEM = "sample"
 # 合成样本基准(由 generate_fixture.py 构造的内容决定)
 BASELINE = {
     "lines_min": 40,                # 取数行数(实际 55,容差 15)
-    "primary_total_min": 15,        # 一级判决词命中(实际 21)
-    "primary_bid_phase_min": 12,    # bid_phase 命中(实际 17)
+    "primary_total_min": 12,        # 一级判决词命中(长词优先去噪后实际 12)
+    "primary_bid_phase_min": 9,     # bid_phase 命中(长词优先去噪后实际 9)
     "customization_min": 6,         # 关系门槛(实际 9)
     "certifications_min": 5,        # 证明文件要求(实际 8)
     "emphasis_min": 10,             # ▲ 命中(实际 13)
