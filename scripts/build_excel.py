@@ -68,6 +68,8 @@ def header_color(title):
         return "7030A0"
     if "时间" in title or "节点" in title:
         return "4472C4"
+    if "合同" in title:  # 合同条款·要点(中标后约束,淡黄,提示参考用)
+        return "BF8F00"
     if "矛盾" in title or "复核" in title:
         return "BF8F00"
     return "305496"

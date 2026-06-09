@@ -49,14 +49,25 @@ def known_words(kw):
     return s
 
 
+CONTRACT_PHRASE_HINTS = ["承包人", "履行", "施工", "竣工", "质保期内", "乙方", "甲方",
+                         "工程师", "监理", "验收", "试车", "签证", "结算",
+                         "工程量", "工程款", "付款义务", "索赔", "不可抗力",
+                         "违约", "赔偿", "质量保证期", "返修", "维护期"]
+CONTRACT_PHRASE_IN_WORD = ["承包人", "乙方", "甲方", "验收", "试车", "工程师",
+                           "结算", "工程量", "索赔", "不可抗力", "违约", "履约"]
+
+
 def classify(phrase, context):
     scope = []
     if any(p in phrase for p in ["视为", "不予", "取消", "将不", "驳回"]):
         scope.append("bid_phase")
     if any(w in context for w in ["评标", "评审", "评委"]) and "evaluation_phase" not in scope:
         scope.append("evaluation_phase")
-    if any(w in context for w in ["承包人", "履行", "施工", "竣工", "质保期内"]) and "contract_phase" not in scope:
+    if any(w in context for w in CONTRACT_PHRASE_HINTS) and "contract_phase" not in scope:
         scope.append("contract_phase")
+    # 强规则:短语本身就是合同期(如"视为承包人实际完成的"/"视为验收通过")→ 强制只 contract_phase
+    if any(w in phrase for w in CONTRACT_PHRASE_IN_WORD):
+        scope = ["contract_phase"]
     if not scope:
         scope = ["evaluation_phase"]
     category = "primary"

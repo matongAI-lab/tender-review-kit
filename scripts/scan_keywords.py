@@ -112,7 +112,7 @@ def scan(lines, kw):
     def excluded(text):
         return any(p.search(text) for p in global_excl)
 
-    hits = {"primary": [], "secondary": [], "customization": [],
+    hits = {"primary": [], "contract": [], "secondary": [], "customization": [],
             "certifications": [], "emphasis_marks": []}
 
     # 强调标识自适应：先统计候选符号频次，达阈值的才认定为本文档强调标识
@@ -129,6 +129,7 @@ def scan(lines, kw):
     detected = [m for m in candidates if counts[m] >= occ_overrides.get(m, min_occ)]
 
     prim_words = get_category(cats, "primary").get("words", [])
+    contract_words = get_category(cats, "contract").get("words", [])
     sec_words = get_category(cats, "secondary").get("words", [])
     cust_words = get_category(cats, "customization").get("words", [])
     cert = get_category(cats, "certifications")
@@ -141,6 +142,9 @@ def scan(lines, kw):
         for w in _primary_hits_for_line(prim_words, text):
             hits["primary"].append({"line": no, "word": w["word"],
                                     "scope": w.get("scope", []), "text": text[:160]})
+        for w in contract_words:
+            if w in text:
+                hits["contract"].append({"line": no, "word": w, "text": text[:160]})
         for w in sec_words:
             if w in text:
                 hits["secondary"].append({"line": no, "word": w, "text": text[:160]})
@@ -225,6 +229,7 @@ def main():
         "summary": {
             "primary": len(hits["primary"]),
             "primary_by_scope": by_scope,
+            "contract": len(hits["contract"]),
             "secondary": len(hits["secondary"]),
             "customization": len(hits["customization"]),
             "certifications": len(hits["certifications"]),
@@ -241,6 +246,7 @@ def main():
     print("OK source=%s lines=%d" % (lines_path.name, len(lines)))
     print("detected_marks=%s counts=%s" % (detected, result["emphasis_counts"]))
     print("primary=%d by_scope=%s" % (s["primary"], s["primary_by_scope"]))
+    print("contract=%d (合同条款·要点,不计入废标)" % s.get("contract", 0))
     print("secondary=%d customization=%d certifications=%d emphasis=%d"
           % (s["secondary"], s["customization"], s["certifications"], s["emphasis_marks"]))
     print("out=%s" % out_path)

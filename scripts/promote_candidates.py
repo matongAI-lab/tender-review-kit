@@ -88,6 +88,8 @@ def main():
     ap.add_argument("--list", action="store_true", help="只列待审候选,不交互")
     ap.add_argument("--decisions", default=None, help="批量决定文件(每行: y/n/s <词>)")
     ap.add_argument("--no-regression", action="store_true")
+    ap.add_argument("--all", action="store_true",
+                    help="--list 默认隐藏纯 contract_phase 候选(合同期 noise);加 --all 显示全部")
     args = ap.parse_args()
 
     if args.candidates:
@@ -113,8 +115,16 @@ def main():
         return
 
     if args.list:
-        print("待审候选 %d 条(按 ★+次数 排序,前 30):" % len(pending))
-        for i, c in enumerate(pending[:30], 1):
+        # 默认隐藏纯合同期候选(scope 只含 contract_phase)— 这些是合同噪音,不是投标废标
+        if args.all:
+            shown = pending
+            hidden_note = ""
+        else:
+            shown = [c for c in pending if set(c.get("suggested_scope", [])) != {"contract_phase"}]
+            hidden = len(pending) - len(shown)
+            hidden_note = f"(已隐藏 {hidden} 条纯合同期 noise,加 --all 显示)" if hidden else ""
+        print(f"待审候选 {len(shown)} 条 {hidden_note}(按 ★+次数 排序,前 30):")
+        for i, c in enumerate(shown[:30], 1):
             near = "★" if c.get("near_known") else " "
             print("  %s[%2d] %dx %-22s %s | scope=%s | %s"
                   % (near, i, c.get("occurrences", 1), c["word"],
