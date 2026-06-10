@@ -184,7 +184,7 @@ scripts/    extract_text✓ scan_keywords✓(为当前) scan_candidates✓(为�
             harvest_ai_words✓(收割AI发现) check_coverage✓ check_completeness✓
             cross_doc✓(跨文件矛盾) build_excel✓
 references/ disqualification-checklist✓(审标对照总清单:废标点+隐性门槛+类型特化+必拿字段)
-            commercial/ disqualification✓ scoring✓ certifications-roster✓ timeline✓
+            commercial/ disqualification✓ scoring✓ certifications-roster✓ timeline✓ contract-terms✓(合同条款·要点)
             technical/  essential-response✓ scoring✓ spec-deviation✓
 data/       keywords.json✓(命根子,120+ 词) | 候选词在 workspace/<项目>.candidates.json(含原文,不入库) | 不再分 9 类,改用 disqualification-checklist.md 逐条对照
 ARCHITECTURE.md  六层架构纲领

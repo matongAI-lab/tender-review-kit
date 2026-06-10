@@ -87,8 +87,9 @@ git clone https://github.com/matongAI-lab/tender-review-kit.git ~/.claude/skills
 
 ## 版本路线
 
-**当前版本:Community Edition v0.1.3(社区开源版)**——本仓库内容,**MIT 许可,免费使用 / 修改 / 商用**。
+**当前版本:Community Edition v0.1.5(社区开源版)**——本仓库内容,**MIT 许可,免费使用 / 修改 / 商用**。
 - 8 个核心程序(取数 / 撒网 / 补词×2 / 查漏 / 完整性 / 跨文件 / Excel) + 一键编排 `run_pipeline.py`
+- **小白零门槛入口(v0.1.5 新增)**:一段咒语发给任意 AI 助手即可全程代办(操作手册 [FOR_AI.md](FOR_AI.md));「怎么开始」三路分流 + 装成常驻 skill 的安装/触发说明
 - **判词库分两层**:开源词库(共享,~120+ 词)+ 用户本地词库(私有积累,gitignored)
 - **AI 发现新词的用户审批流**:不再自动入库,用户拍板决定是否接受
 - **互惠贡献闭环**:你贡献几个,以后别人贡献的你也能拉到
@@ -167,7 +168,7 @@ python run_pipeline.py prep tests/fixtures/sample_tender.docx
 tender-review-kit/
 ├── FOR_AI.md             # 给 AI agent 的操作手册(小白只发一段话,AI 全程代跑)
 ├── QUICKSTART.md         # 30 秒上手指南
-├── SKILL.md              # skill 定义(AI 的触发条件 + 端到端工作流 7 步)
+├── SKILL.md              # skill 定义(AI 的触发条件 + 端到端工作流)
 ├── ARCHITECTURE.md       # 设计纲领(六层栈 + Python/LLM 分工 + 数据驱动)
 ├── run_pipeline.py       # 一键编排: prep(取数+扫描) / verify(护栏+Excel)
 ├── scripts/              # 程序层(确定性 + 护栏,纯标准库+少量 pip)
@@ -186,7 +187,7 @@ tender-review-kit/
 │   └── local_keywords.json    # 用户本地积累(gitignored,审批入库后下次扫别标书自动用上)
 ├── references/           # 知识层(专项工作指南)
 │   ├── disqualification-checklist.md   # 审标对照总清单(废标点+隐性门槛+类型特化+必拿字段)
-│   ├── commercial/                     # 商务线: 废标/评分/证明/时间
+│   ├── commercial/                     # 商务线: 废标/评分/证明/时间/合同条款
 │   └── technical/                      # 技术线: ▲★ 响应/评分/规范偏离
 ├── workspace/            # 运行时中间产物
 └── tests/                # 回归基准
@@ -232,6 +233,7 @@ python scripts/export_contribution.py --github   # 一键提 Issue(需装 gh CLI
 - [x] 8 大程序 + 一键编排(`run_pipeline.py`)+ 通用机制清单
 - [x] 判词库分两层(开源共享 + 用户本地积累)+ 互惠贡献闭环(v0.1.3)
 - [x] AI 发现新词的用户审批流(v0.1.3)
+- [x] 小白零门槛上手:FOR_AI.md 咒语入口 + 三路分流 + skill 安装/触发说明(v0.1.5)
 - [ ] 更多类型实战覆盖
 - [ ] 准确率量化(真值标注 + 测试集)
 - [ ] 词库扩展(目标:200+ 判决词,靠贡献闭环自然生长)

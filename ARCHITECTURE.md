@@ -1,6 +1,6 @@
 # tender-review-kit 架构纲领
 
-> **招标文件审标工具包(为投标人服务)。** 审的是招标方发的招标文件,服务的是要去投标的人。
+> **给 AI agent 用的招标文件审标 skill(为投标人服务)。** 审的是招标方发的招标文件,服务的是要去投标的人。
 > 输入招标文件 → 产出「投标核对清单」(废标项 + 评分项 + 要点),
 > 帮投标人在**动手写投标文件之前**把招标方的游戏规则吃透。**产清单和事实,不下「投/不投」结论。**
 >
@@ -44,12 +44,12 @@
 ## 四、六层能力栈
 
 ```
-编排层  SKILL.md ········· 触发 + 7 步工作流(工具无关主干 + Claude 增强)
+编排层  SKILL.md ········· 触发 + 端到端工作流(工具无关主干 + Claude 增强)
 智能层  subagent / 线性专项 ·· 读 references 做语义判断(去噪 / 读条款 / 整理)
 知识层  references/ ········ 审标对照总清单 + 各专项工作指南
 数据层  data/ ············· ⭐ 判词库【命根子,可 PR】;候选词是 workspace 逐项目产物(含原文,不入库)
 程序层  scripts/ ·········· 取数 / 撒网 / 补词 / 查漏 / 校验 / 跨文件 / 出 Excel
-反哺层  cases/ + tests/ ··· 实战沉淀 + 回归基准
+反哺层  tests/(+ 规划中的 cases/)·· 回归基准 + 实战沉淀
 ```
 
 智能层与知识层是「**一套资产、两种跑法**」:线性顺序跑 / Claude 下 subagent 并行,**读同一套 references + data**,只是执行器不同。
@@ -93,10 +93,10 @@ A/B 红蓝对抗怎么做:关键专项派**两个独立 subagent**各做一遍,�
 
 ```
 实战一份标书 → 两条补词通道(程序正则 + AI语义发现) → 候选库 →
-人审核入库 → 判词库长厚 → 回归测试守住不退化 → 案例沉淀 cases/ → 反哺
+人审核入库 → 判词库长厚 → 回归测试守住不退化 → 案例沉淀 cases/(规划中) → 反哺
 ```
 
-每份扫过的标书去敏后可沉淀进 `cases/`;`tests/` 用合成样本守住基准不退化。
+每份扫过的标书去敏后可沉淀进 `cases/`(目录规划中,首批案例入库时建立);`tests/` 用合成样本守住基准不退化。
 
 ## 九、当前进度
 
@@ -105,15 +105,14 @@ A/B 红蓝对抗怎么做:关键专项派**两个独立 subagent**各做一遍,�
 
 | 层 | 已就绪 ✓ |
 |---|---|
-| 编排 | SKILL.md(中文端到端 7 步 + 两层防线 + 质量旋钮) |
+| 编排 | SKILL.md(中文端到端工作流 + 两层防线 + 质量旋钮) |
 | 程序 | extract_text / scan_keywords / scan_candidates / harvest_ai_words / check_coverage / check_completeness / cross_doc / build_excel |
 | 数据 | keywords.json(120+ 词) ; 候选词在 workspace/<项目>.candidates.json(含原文,不入库,promote 时只转词+scope) |
-| 知识 | disqualification-checklist(审标对照总清单) + commercial × 4 + technical × 3 |
-| 反哺 | cases / tests 基础 |
+| 知识 | disqualification-checklist(审标对照总清单) + commercial × 5(含合同条款) + technical × 3 |
+| 反哺 | tests 基础(cases 规划中) |
 
-## 十、还要做(开源前)
+## 十、还要做
 
 - 准确率量化(真值标注 + 测试集)——这是把"准确"从嘴上变成数字
-- 跨类型实战(政府采购 / 工程 / 央企各一份),完善 `disqualification-checklist.md`
-- 词库扩展(目标 200+)
-- LICENSE 选型
+- 更多类型实战覆盖,持续完善 `disqualification-checklist.md`
+- 词库扩展(目标 200+,靠贡献闭环自然生长)
