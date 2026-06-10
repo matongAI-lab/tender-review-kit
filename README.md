@@ -1,5 +1,7 @@
-# tender-review-kit · 招标文件审标工具包(为投标人服务)
+# tender-review-kit · 招标文件审标 skill(为投标人服务)
 
+> **这不是一个独立软件,是给 AI agent 用的 skill(技能包)**:程序管确定性(取数/扫描/护栏/出 Excel),AI 管判断(读懂条款、分清真假废标项)——**必须配一个 AI agent 一起用**(Claude Code / Codex / 国产 agent 均可)。怎么装、怎么触发见下面[「怎么开始」](#怎么开始按你的情况选一条路)。
+>
 > **审的是招标方发的招标文件,服务的是要去投标的人。**
 >
 > 输入:招标文件(PDF/Word) → 输出:**投标核对清单**(废标项 + 评分项 + 证明材料 + ▲ 标识参数 + 时间节点 + **合同条款要点**),每条带行号出处。
@@ -14,6 +16,74 @@
 > 接口与判词库仍在迭代,这是早期快照——生产使用请自行评估、先跑通自家标书。
 >
 > 本项目按 **MIT 许可开源**(见文末 License),可自由使用 / 修改 / 商用。欢迎试用、提 PR、扩词库。
+
+## 怎么开始(按你的情况选一条路)
+
+### 🤖 路 1:你已经在用 AI 助手(Claude Code / Codex / Cursor / 通义灵码 等)⭐ 最省心
+
+**第一次用·尝鲜(零安装)**:不用看任何文档,把下面这段话原样发给你的 AI(点代码块右上角即可复制):
+
+```text
+请帮我下载并运行这个审标工具:
+https://github.com/matongAI-lab/tender-review-kit
+仓库里有一份 FOR_AI.md,是写给你的操作手册——先读它,然后带着我把流程跑完。
+我可能不懂技术:每一步用大白话告诉我你在干什么;要安装任何东西,先问我。
+我的招标文件稍后发给你。
+```
+
+剩下的全是 AI 的事:下载项目、装环境、要你的标书、审完、把 Excel 交到你手上。你只需要回答它的提问。
+
+**用顺了·装成常驻 skill(以后一句话触发)**:把仓库装进 Claude Code 的 skills 目录,以后**任何会话**里都能直接用,不用再发咒语:
+
+```powershell
+# Windows(PowerShell)
+git clone https://github.com/matongAI-lab/tender-review-kit.git "$env:USERPROFILE\.claude\skills\tender-review-kit"
+```
+
+```bash
+# macOS / Linux
+git clone https://github.com/matongAI-lab/tender-review-kit.git ~/.claude/skills/tender-review-kit
+```
+
+- **怎么触发**:装好后,在 Claude Code 里直接说人话——「帮我审这份招标文件」「看看这份标书的废标点」,它会自动认出该用这个 skill(触发条件写在 [SKILL.md](SKILL.md) 开头的 description 里);想点名也行:「用 tender-review-skill 审这份标书」。
+- **首次使用**:AI 会先跑环境自检(`scripts/check_env.py`),缺什么会问你「装/不装」,不用自己研究。
+- **怎么更新**(顺便拉到别人贡献的判词,见[互惠机制](#怎么贡献互惠机制)):
+  ```bash
+  cd ~/.claude/skills/tender-review-kit && git pull
+  ```
+- 只想在某个项目里用?装到该项目的 `.claude/skills/` 目录,效果一样,只对那个项目生效。
+
+### 🐣 路 2:完全不懂技术,也没用过 AI 助手
+
+这个工具的"判断"环节需要一个 **能操作你电脑文件的 AI 助手**——装下面任意一个就行(只装这一次)。
+⚠️ 注意要装**桌面版 / 编辑器版 / 命令行版**,**纯网页聊天版不行**(网页版碰不到你电脑上的标书文件)。
+
+**国际工具:**
+
+| 工具 | 出品 | 一句话说明 |
+|------|------|-----------|
+| [Claude Code](https://claude.com/claude-code) ⭐ | Anthropic | 跟本 skill 配合最好(subagent 并行、红蓝对抗增强),首选 |
+| [OpenAI Codex](https://developers.openai.com/codex) | OpenAI | ChatGPT 同门,命令行 / 编辑器扩展 |
+| [Cursor](https://cursor.com) | Anysphere | 图形界面编辑器,agent 模式能干活 |
+| [Gemini CLI](https://github.com/google-gemini/gemini-cli) | Google | 免费额度大,有 Google 账号就能用 |
+
+**国内工具(中文界面,网络直连):**
+
+| 工具 | 出品 | 一句话说明 |
+|------|------|-----------|
+| [通义灵码](https://lingma.aliyun.com) | 阿里 | 编辑器插件 + AI 程序员模式 |
+| [Trae](https://www.trae.com.cn) | 字节跳动 | 图形界面,新手最容易上手 |
+| [CodeBuddy](https://copilot.tencent.com) | 腾讯 | 编辑器 + 智能体模式 |
+| [文心快码](https://comate.baidu.com) | 百度 | 编辑器插件 + 智能体模式 |
+
+装好后回到上面 **路 1**,把那段话发给它。
+
+> 选择困难?**国际选 Claude Code,国内选 Trae**——前者跟本 skill 配合最好,后者上手最容易。
+> 不想用 AI 助手、想自己手动装环境跑程序?看 [INSTALL.md](INSTALL.md)——全程只回答「装」或「不装」。
+
+### 👨‍💻 路 3:工程师,自己跑
+
+直接看下面的 [5 分钟上手](#5-分钟上手);架构看 [ARCHITECTURE.md](ARCHITECTURE.md)。
 
 ## 版本路线
 
@@ -55,8 +125,8 @@
 
 ## 5 分钟上手
 
-> 详细版见 [QUICKSTART.md](QUICKSTART.md)。下面是最短路径。
-> **完全不懂技术的同学**:见 [INSTALL.md](INSTALL.md) 一步步教你装环境(只需回答「装」或「不装」)。
+> 详细版见 [QUICKSTART.md](QUICKSTART.md)。下面是最短路径(给想自己敲命令的人)。
+> **不想敲命令?**回到上面的[「怎么开始」](#怎么开始按你的情况选一条路)路 1,把那段话发给你的 AI 就行。手动装环境见 [INSTALL.md](INSTALL.md)。
 
 ```bash
 # 0. 环境自检 ⭐ 首次必跑(自动告诉你缺什么 + 怎么装)
@@ -77,8 +147,9 @@ python run_pipeline.py prep <招标文件.docx 或 .pdf>
 # 4. 程序自动跑(护栏 + 出 Excel,几秒)
 python run_pipeline.py verify workspace/<项目>.工作区.md
 
-# 5. 如果 AI 发现了新判词,审批是否接受
-python scripts/harvest_ai_words.py workspace/<项目>.工作区.md --accept-all
+# 5. 如果 AI 发现了新判词,先看待审清单再拍板
+python scripts/harvest_ai_words.py workspace/<项目>.工作区.md --accept "词A,词B"
+#    (选着收 --accept "词A,词B" / 全收 --accept-all / 全弃 --reject-all)
 #    (接受的进 data/local_keywords.json 用户本地积累,下次扫别的标书自动用上)
 
 # 6. (可选) 把普遍适用的新词加进开源词库,以后别人贡献的你也能拉到
@@ -94,8 +165,9 @@ python run_pipeline.py prep tests/fixtures/sample_tender.docx
 
 ```
 tender-review-kit/
+├── FOR_AI.md             # 给 AI agent 的操作手册(小白只发一段话,AI 全程代跑)
 ├── QUICKSTART.md         # 30 秒上手指南
-├── SKILL.md              # skill 入口 + 端到端工作流(7步)
+├── SKILL.md              # skill 定义(AI 的触发条件 + 端到端工作流 7 步)
 ├── ARCHITECTURE.md       # 设计纲领(六层栈 + Python/LLM 分工 + 数据驱动)
 ├── run_pipeline.py       # 一键编排: prep(取数+扫描) / verify(护栏+Excel)
 ├── scripts/              # 程序层(确定性 + 护栏,纯标准库+少量 pip)
@@ -129,8 +201,8 @@ tender-review-kit/
 
 **最有价值的贡献 = 扩判词库**:
 ```bash
-# 1. 审完标书后,审批 AI 发现的词(--accept-all 全收 / --accept "词" 部分收 / --reject-all 全弃)
-python scripts/harvest_ai_words.py workspace/<项目>.工作区.md --accept-all
+# 1. 审完标书后,审批 AI 发现的词(选着收 --accept "词" / 全收 --accept-all / 全弃 --reject-all)
+python scripts/harvest_ai_words.py workspace/<项目>.工作区.md --accept "词A,词B"
 
 # 2. 把本地词库里普遍适用的词加进开源(自动脱敏,不含标书原文)
 python scripts/export_contribution.py            # 导出预览
@@ -151,7 +223,7 @@ python scripts/export_contribution.py --github   # 一键提 Issue(需装 gh CLI
 4. **列事实带出处,不下结论** —— 不写投/不投、不做报价推演。
 5. **数据驱动 + 工具无关** —— 知识沉淀进 `data/` 和 `references/`,核心流程任何 agent 工具都能跑。
 
-详见 `ARCHITECTURE.md` 与 `SKILL.md`。
+详见 [ARCHITECTURE.md](ARCHITECTURE.md) 与 [SKILL.md](SKILL.md)。
 
 ## 路线图
 
