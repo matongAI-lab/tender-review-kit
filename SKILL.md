@@ -117,13 +117,13 @@ AI 用自然对话告知用户:
 >
 > 这些词如果加入你的**本地词库**(只存你机器上,不传任何地方),下次扫别的标书会自动扫到。**你看哪些要接受?**
 >
-> - 全部接受 → 我帮你跑 `--accept-all`
 > - 部分接受 → 告诉我哪几个(比如"接受第 1、3 个")
+> - 全部接受 → 明确说"全部接受",我再跑 `--accept-all`
 > - 全部拒绝 → 跑 `--reject-all`
 
 用户答复后,AI 调用:
-- 全接受:`python scripts/harvest_ai_words.py <工作区.md> --accept-all`
 - 部分:`python scripts/harvest_ai_words.py <工作区.md> --accept "词A,词B"`
+- 全接受:`python scripts/harvest_ai_words.py <工作区.md> --accept-all`
 - 全拒绝:`python scripts/harvest_ai_words.py <工作区.md> --reject-all`
 
 接受的词进 `data/local_keywords.json`(gitignored)。

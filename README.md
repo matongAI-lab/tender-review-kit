@@ -33,7 +33,9 @@ https://github.com/matongAI-lab/tender-review-kit
 
 剩下的全是 AI 的事:下载项目、装环境、要你的标书、审完、把 Excel 交到你手上。你只需要回答它的提问。
 
-**用顺了·装成常驻 skill(以后一句话触发)**:把仓库装进 Claude Code 的 skills 目录,以后**任何会话**里都能直接用,不用再发咒语:
+**用顺了·装成常驻 skill(以后一句话触发)**:
+
+Claude Code 用户把仓库装进 Claude Code 的 skills 目录:
 
 ```powershell
 # Windows(PowerShell)
@@ -45,13 +47,27 @@ git clone https://github.com/matongAI-lab/tender-review-kit.git "$env:USERPROFIL
 git clone https://github.com/matongAI-lab/tender-review-kit.git ~/.claude/skills/tender-review-kit
 ```
 
-- **怎么触发**:装好后,在 Claude Code 里直接说人话——「帮我审这份招标文件」「看看这份标书的废标点」,它会自动认出该用这个 skill(触发条件写在 [SKILL.md](SKILL.md) 开头的 description 里);想点名也行:「用 tender-review-skill 审这份标书」。
+Codex 用户如果当前客户端支持本地 skills,装到 Codex 的 skills 目录:
+
+```powershell
+# Windows(PowerShell)
+git clone https://github.com/matongAI-lab/tender-review-kit.git "$env:USERPROFILE\.codex\skills\tender-review-kit"
+```
+
+```bash
+# macOS / Linux
+git clone https://github.com/matongAI-lab/tender-review-kit.git ~/.codex/skills/tender-review-kit
+```
+
+Cursor / 通义灵码 / Trae / CodeBuddy 等客户端的 skill 目录机制不完全一样;不确定时,继续用上面的 `FOR_AI.md` 咒语入口,不要照抄 `.claude/skills` 路径。
+
+- **怎么触发**:装好后,在支持 skill 的客户端里直接说人话——「帮我审这份招标文件」「看看这份标书的废标点」,它会按 [SKILL.md](SKILL.md) 开头的 description 识别该用这个 skill;想点名也行:「用 tender-review-skill 审这份标书」。
 - **首次使用**:AI 会先跑环境自检(`scripts/check_env.py`),缺什么会问你「装/不装」,不用自己研究。
 - **怎么更新**(顺便拉到别人贡献的判词,见[互惠机制](#怎么贡献互惠机制)):
   ```bash
-  cd ~/.claude/skills/tender-review-kit && git pull
+  cd <你的 tender-review-kit skill 目录> && git pull
   ```
-- 只想在某个项目里用?装到该项目的 `.claude/skills/` 目录,效果一样,只对那个项目生效。
+- 只想在某个项目里用?按你的客户端规则装到项目级 skills 目录;如果不确定,就使用 `FOR_AI.md` 咒语入口。
 
 ### 🐣 路 2:完全不懂技术,也没用过 AI 助手
 

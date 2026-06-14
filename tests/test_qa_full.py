@@ -153,6 +153,15 @@ try:
             ok("build_excel: 废标 sheet 追加核对/责任人列", "核对结果" in [c.value for c in w[1]])
         ok("build_excel: 有▲标识 sheet", any("标识" in n for n in wb.sheetnames), str(wb.sheetnames))
 
+    # ============ run_pipeline.py verify fail-fast ============
+    bad_wl = write("bad.工作区.md",
+        "# 失败护栏复现\n\n## 商务线·废标\n\n| ID | 条款 | 出处(行号) |\n|---|---|---|\n| D1 | 测试 | 行1 |\n")
+    write("bad.hits.json", "{ not json")
+    bad_xlsx = TMP/"bad.xlsx"
+    rr = run([KIT/"run_pipeline.py", "verify", bad_wl])
+    ok("run_pipeline: 护栏脚本失败时 verify 非零退出", rr.returncode != 0)
+    ok("run_pipeline: 护栏失败时不生成 Excel", not bad_xlsx.exists())
+
     # ============ promote_candidates.py(用合成候选文件) ============
     syn_cand = write("syn.candidates.json", json.dumps({"candidates":[
         {"word":"视为弃标A","occurrences":3,"contexts":["x"],"suggested_scope":["bid_phase"],"suggested_category":"primary","status":"pending_review","near_known":True}

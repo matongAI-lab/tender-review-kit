@@ -102,15 +102,24 @@ def verify(worklist_file, out_xlsx):
     harvest_args = [SCRIPTS / "harvest_ai_words.py", str(worklist)]
     if lines_file.exists():
         harvest_args += ["--lines", str(lines_file)]
-    run(harvest_args,
-        "Step 5+ · 收割 + 补扫：AI 发现的疑似判词 → 候选库 + 回扫当前标书")
+    ok = run(harvest_args,
+             "Step 5+ · 收割 + 补扫：AI 发现的疑似判词 → 候选库 + 回扫当前标书")
+    if not ok:
+        print("✗ verify 中止：新词收割/补扫失败，未生成 Excel。")
+        sys.exit(1)
 
     if hits_file.exists():
-        run([SCRIPTS / "check_coverage.py", str(hits_file), str(worklist)],
-            "Step 6a · 查漏：撒网命中 vs 废标清单覆盖反查")
+        ok = run([SCRIPTS / "check_coverage.py", str(hits_file), str(worklist)],
+                 "Step 6a · 查漏：撒网命中 vs 废标清单覆盖反查")
+        if not ok:
+            print("✗ verify 中止：查漏护栏失败，未生成 Excel。")
+            sys.exit(1)
 
-        run([SCRIPTS / "check_completeness.py", str(worklist), "--hits", str(hits_file)],
-            "Step 6b · 完整性：条数 / 梯度 / ▲ 覆盖校验")
+        ok = run([SCRIPTS / "check_completeness.py", str(worklist), "--hits", str(hits_file)],
+                 "Step 6b · 完整性：条数 / 梯度 / ▲ 覆盖校验")
+        if not ok:
+            print("✗ verify 中止：完整性护栏失败，未生成 Excel。")
+            sys.exit(1)
     else:
         print("⚠ 未找到 %s，跳过护栏检查" % hits_file)
 
@@ -119,34 +128,36 @@ def verify(worklist_file, out_xlsx):
 
     ok = run([SCRIPTS / "build_excel.py", out_xlsx, str(worklist)],
              "Step 7 · 出 Excel")
+    if not ok:
+        print("✗ verify 中止：Excel 生成失败。")
+        sys.exit(1)
 
-    if ok:
-        pending_file = ws_dir / (stem + ".pending_words.json")
-        local_kw_file = SCRIPTS.parent / "data" / "local_keywords.json"
-        print("\n" + "=" * 60)
-        print("✓ verify 完成！")
-        print("  Excel: %s" % out_xlsx)
-        print("  如有护栏 warning，回去让 agent 补漏后重跑 verify。")
+    pending_file = ws_dir / (stem + ".pending_words.json")
+    local_kw_file = SCRIPTS.parent / "data" / "local_keywords.json"
+    print("\n" + "=" * 60)
+    print("✓ verify 完成！")
+    print("  Excel: %s" % out_xlsx)
+    print("  如有护栏 warning，回去让 agent 补漏后重跑 verify。")
 
-        if pending_file.exists():
-            print()
-            print("⚠  AI 发现了一些新判词，已生成待审清单【尚未入库】：")
-            print("    %s" % pending_file)
-            print()
-            print("  请审批后再跑贡献:")
-            print("    python scripts/harvest_ai_words.py %s --accept-all" % worklist)
-            print("    （或 --accept \"词A,词B\" / --reject-all）")
+    if pending_file.exists():
+        print()
+        print("⚠  AI 发现了一些新判词，已生成待审清单【尚未入库】：")
+        print("    %s" % pending_file)
+        print()
+        print("  请先让用户审批，再按选择入库:")
+        print("    python scripts/harvest_ai_words.py %s --accept \"词A,词B\"" % worklist)
+        print("    （用户明确全部接受才用 --accept-all；全部拒绝用 --reject-all）")
 
-        if local_kw_file.exists():
-            print()
-            print("  你接受入库的判词已留在本地,下次扫别的标书会自动用上。")
-            print()
-            print("  这个项目的开源词库是大家一起攒的——你贡献几个,以后别人贡献的你也能拉到。")
-            print("  只要 follow 仓库 + 定期 git pull,就能享受其他用户的发现。")
-            print()
-            print("  把你这些词加进开源 keywords.json:")
-            print("    python scripts/export_contribution.py --github  # 一键提 Issue")
-            print("    python scripts/export_contribution.py           # 先导出预览(脱敏,不含原文)")
+    if local_kw_file.exists():
+        print()
+        print("  你接受入库的判词已留在本地,下次扫别的标书会自动用上。")
+        print()
+        print("  这个项目的开源词库是大家一起攒的——你贡献几个,以后别人贡献的你也能拉到。")
+        print("  只要 follow 仓库 + 定期 git pull,就能享受其他用户的发现。")
+        print()
+        print("  把你这些词加进开源 keywords.json:")
+        print("    python scripts/export_contribution.py --github  # 一键提 Issue")
+        print("    python scripts/export_contribution.py           # 先导出预览(脱敏,不含原文)")
 
 
 def main():

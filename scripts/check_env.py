@@ -53,7 +53,7 @@ def main():
     checks = [
         ("docx", "python-docx", "解析 .docx 招标文件", "无法解析 .docx 文件(.pdf 仍可用)", True),
         ("pypdf", "pypdf", "解析 PDF(兜底)", "无法解析任何 PDF 文件", True),
-        ("openpyxl", "openpyxl", "出 Excel", "无法把清单转 Excel,只能用 Markdown(主要功能不受影响)", False),
+        ("openpyxl", "openpyxl", "出 Excel", "无法生成最终 Excel 核对清单", True),
     ]
 
     print("▎Python 包")

@@ -86,8 +86,9 @@ verify 之后如果出现 `workspace/<项目>.pending_words.json`,说明你在�
 1. **把每个新词 + 它的原文语境列给用户看**,问用户:"这几个词要不要收进你的本地词库?收了以后扫别的标书会自动用上。"
 2. 按用户的答复执行(全收 / 收一部分 / 全不收):
    ```bash
-   python scripts/harvest_ai_words.py workspace/<项目>.工作区.md --accept-all   # 或 --accept "词A,词B" / --reject-all
+   python scripts/harvest_ai_words.py workspace/<项目>.工作区.md --accept "词A,词B"
    ```
+   用户明确说"全部接受"时才用 `--accept-all`;用户说"都不要"时用 `--reject-all`。
 3. 入库后,**再单独问一次**:"这里面有没有普遍适用(不含你项目隐私)的词,愿意贡献给开源词库?你贡献的词别人能用,别人贡献的你 `git pull` 也能拉到。"用户明确同意才跑:
    ```bash
    python scripts/export_contribution.py --github
