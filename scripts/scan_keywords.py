@@ -7,7 +7,7 @@
   - secondary     二级判决词
   - customization  商务定制门槛（关系门槛：厂商授权/必须接入…）
   - certifications 证明文件要求（正则，含 exclude 排除质保维保类误命中）
-  - emphasis_marks 强调标识（▲/★/◆…按出现频次自适应识别本文档实际用的）
+  - emphasis_marks 强调标识（▲/★/◆…按出现频次自适应识别本文档实际用的；同一长表格行内多项逐条拆分）
 
 输出命中清单（行号 + 词 + 类别 + scope）→ *.hits.json。
 这是「全文撒网」，后续 check_coverage.py 据此反查废标项是否覆盖。
@@ -67,6 +67,47 @@ def _emph_hit(mark, text):
     if mark == "*":
         return bool(_STAR_EMPH.search(text))
     return mark in text
+
+
+def _emph_positions(mark, text):
+    """Return valid emphasis mark start positions in text."""
+    if mark == "*":
+        for m in _STAR_EMPH.finditer(text):
+            pos = text.find("*", m.start(), m.end())
+            if pos != -1:
+                yield pos
+        return
+    start = text.find(mark)
+    while start != -1:
+        yield start
+        start = text.find(mark, start + len(mark))
+
+
+def _emph_segments(detected, text, max_chars=240):
+    """Split one extracted line into per-mark emphasis snippets.
+
+    extract_text.py flattens each table row into one long line. A single line can
+    therefore contain many ▲/★ parameters; recording only one hit per line loses
+    clauses. This returns one snippet per mark occurrence, ending at the next
+    detected mark where possible.
+    """
+    starts = []
+    seen = set()
+    for mark in detected:
+        for pos in _emph_positions(mark, text):
+            if pos in seen:
+                continue
+            seen.add(pos)
+            starts.append((pos, mark))
+    starts.sort()
+
+    for idx, (pos, mark) in enumerate(starts):
+        end = starts[idx + 1][0] if idx + 1 < len(starts) else len(text)
+        snippet = text[pos:end].strip()
+        snippet = snippet.strip("|").strip()
+        if len(snippet) > max_chars:
+            snippet = snippet[:max_chars].rstrip() + "..."
+        yield mark, snippet
 
 
 def _literal_spans(word, text):
@@ -157,10 +198,13 @@ def scan(lines, kw):
                     continue
                 hits["certifications"].append({"line": no, "pattern": p.pattern, "text": text[:160]})
                 break
-        for m in detected:
-            if _emph_hit(m, text):
-                hits["emphasis_marks"].append({"line": no, "mark": m, "text": text[:160]})
-                break
+        for idx, (m, snippet) in enumerate(_emph_segments(detected, text), 1):
+            hits["emphasis_marks"].append({
+                "line": no,
+                "mark": m,
+                "item_index": idx,
+                "text": snippet[:160],
+            })
 
     return hits, detected, counts
 
