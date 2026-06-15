@@ -1,5 +1,22 @@
 # Changelog
 
+## 2026-06-15 · Community Edition v0.1.7
+
+### Fixed
+
+- 解耦“当前标书补漏”和“是否入本地词库”：`harvest_ai_words.py` 默认用 AI 发现词临时回扫当前 `lines.txt`,不写 `data/local_keywords.json`;用户接受/拒绝只影响以后标书是否自动命中。
+- `--reject-all` 现在明确提示：拒绝入库不代表当前标书忽略这些词,当前补漏应以上一次临时回扫新增命中为准。
+
+### Changed
+
+- `run_pipeline.py verify` 收尾固定说明词库互惠机制,即使当前还没有本地词库,也会提示以后如何脱敏贡献。
+- `SKILL.md` 和 `FOR_AI.md` 明确三条红线：当前补漏不等用户入库;入库必须用户拍板;对外贡献必须用户明确同意。
+
+### Tests
+
+- 新增回归：默认收割 AI 发现词时会临时回扫当前标书。
+- 新增回归：拒绝入库只清待审清单,不会被解释为忽略当前补漏。
+
 ## 2026-06-15 · Community Edition v0.1.6
 
 ### Fixed

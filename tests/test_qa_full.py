@@ -127,6 +127,24 @@ try:
     r = comp("## 技术线·▲标识\n\n| ID | 参数 | 出处 |\n|---|---|---|\n| E1 | a | 行1 |\n| E2 | b | 行2 |\n", hits=str(hp))
     ok("completeness: ▲ 清单远少于撒网->warning", "▲" in r.stdout and "压缩" in r.stdout)
 
+    # ============ harvest_ai_words.py ============
+    hv_lines = lines_file("hv.lines.txt", [(1, "供应商出现测试违规的,取消测试资格。")])
+    hv_hits = TMP/"hv.hits.json"
+    json.dump({"hits":{"primary":[],"contract":[],"secondary":[],"customization":[],"certifications":[],"emphasis_marks":[]}},
+              open(hv_hits, "w", encoding="utf-8"), ensure_ascii=False)
+    hv_wl = write("hv.工作区.md",
+        "# AI 发现回扫\n\n## 商务线·废标\n\n| ID | 条款 | 出处(行号) |\n|---|---|---|\n"
+        "| D1 | 已发现条款 | 行1 |\n\n"
+        "## AI发现疑似判词\n\n| 疑似判词 | 原文摘要 | 出处 | 建议分类 |\n|---|---|---|---|\n"
+        "| 取消测试资格 | 出现测试违规的,取消测试资格 | 行1 | primary/bid_phase |\n")
+    r = run([SC/"harvest_ai_words.py", hv_wl, "--lines", hv_lines, "--hits", hv_hits])
+    ok("harvest: 默认模式会临时回扫当前标书", r.returncode == 0 and "临时回扫当前标书" in r.stdout)
+    ok("harvest: 未入库也生成当前补漏 hits", (TMP/"hv.ai_rescan.hits.json").exists())
+    hv_rescan = json.load(open(TMP/"hv.ai_rescan.hits.json", encoding="utf-8"))
+    ok("harvest: 临时回扫命中新 AI 判词", any(h.get("word") == "取消测试资格" for h in hv_rescan["hits"]["primary"]))
+    r = run([SC/"harvest_ai_words.py", hv_wl, "--reject-all"])
+    ok("harvest: 拒绝入库只清 pending,不代表忽略当前补漏", r.returncode == 0 and "当前标书补漏不受影响" in r.stdout)
+
     # ============ cross_doc.py ============
     ok("cross_doc: <2 文件 exit=1", run([SC/"cross_doc.py", lf]).returncode == 1)
     a = lines_file("d1.lines.txt", [(1,"最高投标限价为 100 万元")]); b = lines_file("d2.lines.txt", [(1,"最高投标限价为 200 万元")])

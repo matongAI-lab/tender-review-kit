@@ -144,20 +144,25 @@ def verify(worklist_file, out_xlsx):
         print("⚠  AI 发现了一些新判词，已生成待审清单【尚未入库】：")
         print("    %s" % pending_file)
         print()
+        print("  注意:入库只影响以后标书;当前标书补漏已经在 Step 5+ 用临时词库回扫过。")
         print("  请先让用户审批，再按选择入库:")
         print("    python scripts/harvest_ai_words.py %s --accept \"词A,词B\"" % worklist)
         print("    （用户明确全部接受才用 --accept-all；全部拒绝用 --reject-all）")
 
+    print()
+    print("  词库互惠机制:")
+    print("    - AI/程序发现的新判词,用户接受后会进 data/local_keywords.json,只存在本机。")
+    print("    - 如果其中有普遍适用、无项目隐私的词,可脱敏贡献给开源词库,别人也能用。")
+    print("    - 你定期 git pull,也能拿到别人贡献的新词。")
     if local_kw_file.exists():
         print()
         print("  你接受入库的判词已留在本地,下次扫别的标书会自动用上。")
-        print()
-        print("  这个项目的开源词库是大家一起攒的——你贡献几个,以后别人贡献的你也能拉到。")
-        print("  只要 follow 仓库 + 定期 git pull,就能享受其他用户的发现。")
-        print()
-        print("  把你这些词加进开源 keywords.json:")
+        print("  把本地词库里适合公开共享的词贡献给开源 keywords.json:")
         print("    python scripts/export_contribution.py --github  # 一键提 Issue")
         print("    python scripts/export_contribution.py           # 先导出预览(脱敏,不含原文)")
+    else:
+        print("  当前还没有本地词库;以后接受新词后,可用:")
+        print("    python scripts/export_contribution.py           # 导出预览(脱敏,不含原文)")
 
 
 def main():

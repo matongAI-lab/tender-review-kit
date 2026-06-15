@@ -1,28 +1,30 @@
 #!/usr/bin/env python3
 # -*- coding: utf-8 -*-
-"""harvest_ai_words.py — AI 发现的新判词:待审 → 用户拍板 → 入本地库 + 回扫
+"""harvest_ai_words.py — AI 发现的新判词:当前补漏回扫 + 待审入库
 
 AI 在 Step 5 读条款时可能发现 keywords.json 没覆盖的判决性语言。
 按 SKILL.md 约定,AI 把这些词写进工作区 md 的 `## AI发现疑似判词` 表格。
 
-**两步走** (v0.1.3 设计:不再"自动入库",用户必须拍板):
+**两件事必须解耦**:
+1. 当前标书补漏:发现疑似判词后,默认用临时词库回扫当前 lines.txt,不写本地库。
+2. 未来自动扫描:用户明确接受后,才写入 data/local_keywords.json。
 
-Step 1. 列出待审 (默认行为,不写本地库):
+Step 1. 列出待审 + 当前补漏回扫 (默认行为,不写本地库):
     python harvest_ai_words.py <工作区.md>
-    → 解析表格 → 写 workspace/<项目>.pending_words.json → 打印每个词
+    → 解析表格 → 写 pending_words.json → 临时回扫当前标书 → 打印新增命中
 
-Step 2. 用户/AI 拍板后,入本地库 + 回扫:
+Step 2. 用户/AI 拍板后,只决定是否入本地库:
     python harvest_ai_words.py <工作区.md> --accept-all          # 全接受
     python harvest_ai_words.py <工作区.md> --accept "词A,词B"     # 部分接受
     python harvest_ai_words.py <工作区.md> --reject-all          # 全拒绝(清空 pending)
 
-接受的词写入 data/local_keywords.json(用户本地积累,gitignored),
-然后用合并后的词库重扫 lines.txt → diff 新旧 hits → 报新增命中行。
+接受的词写入 data/local_keywords.json(用户本地积累,gitignored),供以后标书自动命中。
 """
 import sys
 import re
 import json
 import subprocess
+import tempfile
 from pathlib import Path
 
 try:
@@ -166,15 +168,77 @@ def merge_into_local(accepted):
     return added_words
 
 
-def rescan_and_diff(lines_path, old_hits_path):
-    new_hits_path = Path(lines_path).with_name(
-        Path(lines_path).stem.replace(".lines", "") + ".hits.v2.json"
-    )
+def _merge_discovered_words(kw, discovered):
+    """把 AI 发现词合并进一份临时词库结构,不写 data/local_keywords.json。"""
+    cat_by_id = {c.get("id"): c for c in kw.get("categories", [])}
+    for f in discovered:
+        cid = f.get("category", "primary")
+        if cid not in _VALID_CATEGORIES:
+            cid = "primary"
+        if cid not in cat_by_id:
+            cat_by_id[cid] = {"id": cid, "words": []}
+            kw.setdefault("categories", []).append(cat_by_id[cid])
+
+        existing = set()
+        for w in cat_by_id[cid].get("words", []):
+            existing.add(w["word"] if isinstance(w, dict) else w)
+        if f["word"] in existing:
+            continue
+
+        if cid == "primary":
+            cat_by_id[cid].setdefault("words", []).append({
+                "word": f["word"],
+                "scope": f.get("scope", ["bid_phase"]),
+            })
+        else:
+            cat_by_id[cid].setdefault("words", []).append(f["word"])
+    return kw
+
+
+def _keyword_key(hit):
+    return (hit.get("line"), hit.get("word", hit.get("pattern", hit.get("mark", ""))))
+
+
+def rescan_and_diff(lines_path, old_hits_path, extra_words=None, suffix=".hits.v2.json"):
+    stem = Path(lines_path).stem.replace(".lines", "")
+    new_hits_path = Path(lines_path).with_name(stem + suffix)
+    cmd = [sys.executable, str(SCAN_KW), str(lines_path), "--out", str(new_hits_path)]
+    tmp_kw_path = None
+
+    if extra_words:
+        base_kw = json.loads((BASE / "data" / "keywords.json").read_text(encoding="utf-8"))
+        if LOCAL_KW_PATH.exists():
+            try:
+                local = json.loads(LOCAL_KW_PATH.read_text(encoding="utf-8"))
+                base_kw = _merge_discovered_words(base_kw, [
+                    {
+                        "word": w["word"] if isinstance(w, dict) else w,
+                        "scope": w.get("scope", []) if isinstance(w, dict) else [],
+                        "category": cat.get("id", "primary"),
+                    }
+                    for cat in local.get("categories", [])
+                    for w in cat.get("words", [])
+                ])
+            except (json.JSONDecodeError, KeyError):
+                pass
+        temp_kw = _merge_discovered_words(base_kw, extra_words)
+        tmp = tempfile.NamedTemporaryFile("w", encoding="utf-8", suffix=".keywords.json", delete=False)
+        try:
+            json.dump(temp_kw, tmp, ensure_ascii=False, indent=2)
+            tmp_kw_path = tmp.name
+        finally:
+            tmp.close()
+        cmd += ["--keywords", tmp_kw_path]
 
     r = subprocess.run(
-        [sys.executable, str(SCAN_KW), str(lines_path), "--out", str(new_hits_path)],
+        cmd,
         capture_output=True, text=True, encoding="utf-8"
     )
+    if tmp_kw_path:
+        try:
+            Path(tmp_kw_path).unlink()
+        except OSError:
+            pass
     if r.returncode != 0:
         print("✗ 重扫失败: %s" % r.stderr)
         return None, []
@@ -186,17 +250,39 @@ def rescan_and_diff(lines_path, old_hits_path):
         old_hits = json.loads(Path(old_hits_path).read_text(encoding="utf-8"))
         for cat, hits in old_hits.get("hits", {}).items():
             for h in hits:
-                key = (h.get("line"), h.get("word", h.get("pattern", h.get("mark", ""))))
-                old_set.add(key)
+                old_set.add(_keyword_key(h))
 
     new_in_new = []
     for cat, hits in new_hits.get("hits", {}).items():
         for h in hits:
-            key = (h.get("line"), h.get("word", h.get("pattern", h.get("mark", ""))))
-            if key not in old_set:
+            if _keyword_key(h) not in old_set:
                 new_in_new.append({**h, "_category": cat})
 
     return new_hits_path, new_in_new
+
+
+def print_new_hits(new_hits_path, new_hits, current_only=False):
+    """打印回扫新增命中。"""
+    if current_only:
+        print()
+        print("▶ 已用 AI 发现词【临时回扫当前标书】,不写入本地词库。")
+    if not new_hits_path:
+        return
+    print()
+    if new_hits:
+        print("⚠  当前标书共找到 %d 条**新增命中**:" % len(new_hits))
+        for h in new_hits[:30]:
+            line = h.get("line", "?")
+            key = h.get("word", h.get("pattern", h.get("mark", "?")))
+            text = h.get("text", "")
+            print("  行%-5s [%s] %s" % (line, key, text[:60]))
+        if len(new_hits) > 30:
+            print("  ... 还有 %d 条" % (len(new_hits) - 30))
+        print()
+        print("→ AI/用户:这些是当前标书补漏线索,无论是否入库,都要逐条判断是否补到工作区清单。")
+        print("→ 回扫产物: %s" % new_hits_path)
+    else:
+        print("✓ AI 发现词未在当前标书产生额外命中(工作区已记录了发现位置)。")
 
 
 def _already_in_local(word):
@@ -293,8 +379,16 @@ def main():
         write_pending(found, pending_path)
         print_pending(found)
 
+        if lines_path and Path(lines_path).exists():
+            new_hits_path, new_hits = rescan_and_diff(
+                lines_path, hits_path, extra_words=found, suffix=".ai_rescan.hits.json"
+            )
+            print_new_hits(new_hits_path, new_hits, current_only=True)
+        else:
+            print("⚠ 未找到 lines.txt,跳过当前标书临时回扫。")
+
         print("─" * 60)
-        print("⚠  这些词【尚未入库】。请审批:")
+        print("⚠  这些词【尚未入库】。入库只影响以后标书;当前标书补漏以上方临时回扫为准。请审批:")
         print()
         print("  全部接受  →  python scripts/harvest_ai_words.py %s --accept-all" % md_path)
         print("  部分接受  →  python scripts/harvest_ai_words.py %s --accept \"词A,词B\"" % md_path)
@@ -308,6 +402,8 @@ def main():
         if pending_path.exists():
             pending_path.unlink()
         print("✓ 已拒绝所有待审词,清单文件已删除。本地词库不变。")
+        print("  注意:拒绝入库只表示这些词以后不自动用于新标书;当前标书补漏不受影响。")
+        print("  请以上一次默认运行时的【临时回扫当前标书】新增命中为准,逐条判断是否补工作区。")
         return
 
     # === 模式 3: --accept-all 或 --accept ===
@@ -348,28 +444,14 @@ def main():
     if pending_path.exists():
         pending_path.unlink()
 
-    # === 触发回扫 ===
+    # === 入库后确认：再跑一次正式词库回扫,产物可供对照 ===
     if lines_path and Path(lines_path).exists():
         print()
         print("▶ 用合并后的词库重扫 lines.txt,对照旧 hits 找新增命中…")
         new_hits_path, new_hits = rescan_and_diff(lines_path, hits_path)
 
         if new_hits_path:
-            print()
-            if new_hits:
-                print("⚠  新词在当前标书共找到 %d 条**新增命中**:" % len(new_hits))
-                for h in new_hits[:30]:
-                    line = h.get("line", "?")
-                    key = h.get("word", h.get("pattern", h.get("mark", "?")))
-                    text = h.get("text", "")
-                    print("  行%-5s [%s] %s" % (line, key, text[:60]))
-                if len(new_hits) > 30:
-                    print("  ... 还有 %d 条" % (len(new_hits) - 30))
-                print()
-                print("→ AI/用户:逐条检查这些新增命中,判断是否需要补到工作区清单。")
-                print("→ 重扫产物: %s" % new_hits_path)
-            else:
-                print("✓ 新词未在当前标书产生新增命中(工作区已记录了所有出现位置)。")
+            print_new_hits(new_hits_path, new_hits)
     else:
         print("⚠ 未找到 lines.txt,跳过回扫。")
 
