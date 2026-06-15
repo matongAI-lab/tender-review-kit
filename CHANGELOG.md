@@ -1,5 +1,15 @@
 # Changelog
 
+## 2026-06-15 · Community Edition v0.1.9
+
+### Changed
+
+- 强化用户贡献隐私声明：贡献完全自愿,不给也能正常使用工具。
+- 明确脱敏贡献只包含判词短语、建议分类、scope、发现方式、出现次数。
+- 明确不会导出标书原文、项目名称、行号上下文、Excel、工作区全文或用户本地词库文件。
+- 明确 `export_contribution.py --github` 默认创建 GitHub Issue 供维护者审核,不会自动合并进开源总词库。
+- `README.md`、`SKILL.md`、`FOR_AI.md`、`run_pipeline.py` 和 `export_contribution.py` 均同步展示同一套说明。
+
 ## 2026-06-15 · Community Edition v0.1.8
 
 ### Changed

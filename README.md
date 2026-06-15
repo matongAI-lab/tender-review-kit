@@ -103,8 +103,9 @@ Cursor / 通义灵码 / Trae / CodeBuddy 等客户端的 skill 目录机制不�
 
 ## 版本路线
 
-**当前版本:Community Edition v0.1.8(社区开源版)**——本仓库内容,**MIT 许可,免费使用 / 修改 / 商用**。
+**当前版本:Community Edition v0.1.9(社区开源版)**——本仓库内容,**MIT 许可,免费使用 / 修改 / 商用**。
 - 8 个核心程序(取数 / 撒网 / 补词×2 / 查漏 / 完整性 / 跨文件 / Excel) + 一键编排 `run_pipeline.py`
+- **贡献隐私声明强化(v0.1.9 新增)**:明确告诉用户贡献完全自愿,不上传标书/Excel/原文/项目名,只提交判词短语和分类/scope,并默认通过 Issue 由维护者审核。
 - **开源判词库扩展(v0.1.8 新增)**:并入 5 个用户确认过、已脱敏的通用判词,提升无效响应/中标资格/联合体/分包转包/实质响应类命中。
 - **AI 发现词当前补漏回扫(v0.1.7 新增)**:AI 发现疑似判词后,先用临时词库回扫当前标书,不等用户入库;用户接受/拒绝只决定未来是否自动扫到。
 - **词库贡献提醒强化(v0.1.7 新增)**:verify 收尾固定说明本地词库/开源词库互惠机制,让 agent 稳定提醒用户可脱敏贡献新词。
@@ -216,6 +217,13 @@ tender-review-kit/
 ## 怎么贡献(互惠机制)
 
 **开源词库 = 所有用户一起攒**——你今天贡献几个词,以后别人贡献的你也能拉到。
+
+**隐私声明先说清楚**:
+- 贡献完全自愿,不给也能正常使用本工具。
+- 我们不拿你的标书、Excel、工作区、原文片段、项目名称、行号上下文。
+- 脱敏贡献只包含几个判词短语及其分类/scope,例如"取消中标资格 / primary / evaluation_phase"。
+- 默认路径是创建 GitHub Issue 给维护者审核,不会自动直接写入开源总词库。
+
 - ✅ Follow 这个仓库 + 定期 `git pull` → 自动用上所有贡献者的发现
 - ✅ 用 `export_contribution.py` 把你的词加进开源 → 别人也能用上你的判断
 - ✅ 你的本地词库(`data/local_keywords.json`)永远是你自己的,贡不贡献都在,扫别的标书继续用
@@ -229,7 +237,7 @@ python scripts/harvest_ai_words.py workspace/<项目>.工作区.md --accept "词
 python scripts/export_contribution.py            # 导出预览
 python scripts/export_contribution.py --github   # 一键提 Issue(需装 gh CLI 并登录)
 ```
-工具会同时收集两条通道(程序补词 candidates.json + AI 发现 local_keywords.json),去掉原文片段,去重现有开源词库,生成干净的贡献表。
+工具会同时收集两条通道(程序补词 candidates.json + AI 发现 local_keywords.json),去掉原文片段,去重现有开源词库,生成干净的贡献表。`--github` 只是提交一个待审核 Issue,维护者确认后才会合并进 `data/keywords.json`。
 
 **其他贡献方向**:
 - 补 references(给审标对照清单加条目 / 补专项工作指南)

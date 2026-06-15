@@ -156,6 +156,8 @@ AI 看新增命中,逐条判断:
 
 > 这次你接受入库的判词(像"取消中标资格""不接受联合体投标"这种),已经留在你的本地词库里——下次扫别的标书会自动用上。
 >
+> 隐私先说清楚:贡献完全自愿,不给也能正常用;我们不拿你的标书、Excel、工作区、原文片段、项目名称或行号上下文。脱敏贡献只包含几个判词短语及其分类/scope,例如"取消中标资格 / primary / evaluation_phase"。
+>
 > 想不想让其中**普遍适用**的词也进入开源 keywords.json?这个项目的判词库就是大家一起攒的——
 >
 > - 你今天贡献几个词,**别人下次更新时也能用上你的发现**
@@ -165,7 +167,7 @@ AI 看新增命中,逐条判断:
 >
 > 完全自愿。要把这些词加进开源吗?
 
-- 用户说好 → 跑 `python scripts/export_contribution.py --github`(自动从 `data/local_keywords.json` 读取并创建 GitHub Issue)。如果没装 gh CLI,改用 `export_contribution.py`(无 --github)导出文件,告诉用户粘贴到 https://github.com/matongAI-lab/tender-review-kit/issues/new
+- 用户说好 → 跑 `python scripts/export_contribution.py --github`(自动从 `data/local_keywords.json` 读取并创建 GitHub Issue,供维护者审核后再合并)。如果没装 gh CLI,改用 `export_contribution.py`(无 --github)导出文件,告诉用户粘贴到 https://github.com/matongAI-lab/tender-review-kit/issues/new
 - 用户说不 → 正常结束,不再提。**也顺便告诉用户:即使不贡献,follow 仓库 + 定期 `git pull` 就能持续拿到别人贡献的更新**。
 - **只问一次,不纠缠;语气是平等的、说明机制,不是请求**
 

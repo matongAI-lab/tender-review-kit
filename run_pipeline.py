@@ -152,7 +152,10 @@ def verify(worklist_file, out_xlsx):
     print()
     print("  词库互惠机制:")
     print("    - AI/程序发现的新判词,用户接受后会进 data/local_keywords.json,只存在本机。")
-    print("    - 如果其中有普遍适用、无项目隐私的词,可脱敏贡献给开源词库,别人也能用。")
+    print("    - 贡献完全自愿;不给也能正常使用。")
+    print("    - 我们不拿标书、Excel、工作区、原文片段、项目名称或行号上下文。")
+    print("    - 如果其中有普遍适用、无项目隐私的词,可只贡献判词短语 + 分类/scope。")
+    print("    - --github 默认创建 Issue 给维护者审核,不会自动直写开源总词库。")
     print("    - 你定期 git pull,也能拿到别人贡献的新词。")
     if local_kw_file.exists():
         print()

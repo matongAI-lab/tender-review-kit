@@ -5,6 +5,12 @@
 读 workspace 里的 candidates.json，去掉原文片段（保护标书隐私），
 去重现有 keywords.json，输出干净的贡献文件。
 
+隐私边界:
+  - 贡献完全自愿,不给也能正常使用工具。
+  - 导出不包含标书原文、项目名、行号上下文、Excel、工作区全文。
+  - 导出只包含判词短语、建议分类、建议 scope、发现方式、出现次数。
+  - --github 只创建 GitHub Issue 供维护者审核,不会自动合并进总词库。
+
 三种提交方式：
   1. --github  自动创建 GitHub Issue（需装 gh CLI 并登录）
   2. --pr      自动创建 PR 到 contributions/ 目录（需装 gh CLI）
@@ -105,8 +111,11 @@ def build_markdown(candidates):
     lines = []
     lines.append("## 判词贡献 / Keyword Contribution")
     lines.append("")
-    lines.append("以下判词由工具扫描 + AI 发现，已脱敏（不含原文）。")
-    lines.append("请维护者审核后通过 `promote_candidates.py` 入库。")
+    lines.append("以下判词由工具扫描 + AI 发现，已脱敏。")
+    lines.append("")
+    lines.append("隐私声明：本贡献不含标书原文、项目名、行号上下文、Excel、工作区全文或用户本地词库文件；只包含用户自愿分享的判词短语及分类/scope 等元数据。")
+    lines.append("")
+    lines.append("请维护者审核后再合并进 `data/keywords.json`。")
     lines.append("")
     lines.append("| 判词 | 建议分类 | 建议 scope | 发现方式 | 出现次数 |")
     lines.append("|------|----------|------------|----------|----------|")
@@ -258,6 +267,10 @@ def main():
     print("  - 本地词库(local_keywords.json) %d 词" % len(local_words))
     print("  合并去重后 %d 词，其中 %d 个是新词（开源库未收录）"
           % (len(all_words), len(new)))
+    print()
+    print("隐私声明：贡献完全自愿；本导出不包含标书原文、项目名、行号上下文、Excel 或工作区全文。")
+    print("导出内容只包含判词短语、建议分类、scope、发现方式和出现次数。")
+    print("--github 只会创建 GitHub Issue 供维护者审核，不会自动合并进总词库。")
 
     md = build_markdown(new)
 
