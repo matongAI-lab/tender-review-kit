@@ -375,6 +375,36 @@
           "scope": [
             "bid_phase"
           ]
+        },
+        {
+          "word": "视为无效投标响应",
+          "scope": [
+            "bid_phase"
+          ]
+        },
+        {
+          "word": "取消中标资格",
+          "scope": [
+            "evaluation_phase"
+          ]
+        },
+        {
+          "word": "不接受联合体投标",
+          "scope": [
+            "bid_phase"
+          ]
+        },
+        {
+          "word": "不接受分包、转包",
+          "scope": [
+            "contract_phase"
+          ]
+        },
+        {
+          "word": "视为未实质响应采购文件",
+          "scope": [
+            "evaluation_phase"
+          ]
         }
       ]
     },

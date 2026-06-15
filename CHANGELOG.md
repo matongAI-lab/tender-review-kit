@@ -1,5 +1,20 @@
 # Changelog
 
+## 2026-06-15 · Community Edition v0.1.8
+
+### Changed
+
+- 开源 `data/keywords.json` 新增 5 个用户确认过的通用判词：
+  - `视为无效投标响应`
+  - `取消中标资格`
+  - `不接受联合体投标`
+  - `不接受分包、转包`
+  - `视为未实质响应采购文件`
+
+### Privacy
+
+- 本次词库贡献只包含判词短语和 scope,不包含任何真实标书原文、项目名称、Excel 结果、workspace 产物或用户本地词库文件。
+
 ## 2026-06-15 · Community Edition v0.1.7
 
 ### Fixed
