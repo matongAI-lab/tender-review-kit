@@ -99,6 +99,18 @@
           ]
         },
         {
+          "word": "不予考虑",
+          "scope": [
+            "evaluation_phase"
+          ]
+        },
+        {
+          "word": "不被推荐为中标候选人",
+          "scope": [
+            "evaluation_phase"
+          ]
+        },
+        {
           "word": "取消资格",
           "scope": [
             "bid_phase",
@@ -118,13 +130,31 @@
           ]
         },
         {
+          "word": "视为撤回投标文件",
+          "scope": [
+            "bid_phase"
+          ]
+        },
+        {
           "word": "视为撤销",
           "scope": [
             "bid_phase"
           ]
         },
         {
+          "word": "视为撤销其投标文件",
+          "scope": [
+            "bid_phase"
+          ]
+        },
+        {
           "word": "视为主动撤回",
+          "scope": [
+            "bid_phase"
+          ]
+        },
+        {
+          "word": "视为主动撤回投标文件",
           "scope": [
             "bid_phase"
           ]
@@ -175,6 +205,13 @@
         {
           "word": "非响应性",
           "scope": [
+            "evaluation_phase"
+          ]
+        },
+        {
+          "word": "视为非响应性投标予以拒绝",
+          "scope": [
+            "bid_phase",
             "evaluation_phase"
           ]
         },
@@ -431,6 +468,13 @@
           "scope": [
             "evaluation_phase"
           ]
+        },
+        {
+          "word": "视为没有实质性响应招标文件",
+          "scope": [
+            "bid_phase",
+            "evaluation_phase"
+          ]
         }
       ]
     },
@@ -491,7 +535,11 @@
         "不予扣除",
         "不予核减",
         "视为同意评标结论",
-        "视为送达"
+        "视为送达",
+        "电子投标加密",
+        "验签要求",
+        "视为成功提交投标文件",
+        "视为投标人响应招标文件的全部要求"
       ]
     },
     {
