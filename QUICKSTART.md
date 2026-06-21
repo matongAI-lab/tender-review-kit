@@ -24,7 +24,7 @@ python run_pipeline.py prep <你的招标文件.docx>
 
 ## 3. 判断阶段：交给 AI agent
 
-把下面这段话发给你的 AI（Claude Code / Workbuddy / Codex / 通义等）：
+把下面这段话发给你的 AI（能操作本地文件的 AI 编程助手）：
 
 > 请按 SKILL.md 的步骤 1-2-4-5 审核这份招标文件。
 > 带行号文本在 workspace/xxx.lines.txt，撒网命中在 workspace/xxx.hits.json，

@@ -1,6 +1,6 @@
 # tender-review-kit · 招标文件审标 skill(为投标人服务)
 
-> **这不是一个独立软件,是给 AI agent 用的 skill(技能包)**:程序管确定性(取数/扫描/护栏/出 Excel),AI 管判断(读懂条款、分清真假废标项)——**必须配一个 AI agent 一起用**(Claude Code / Codex / 国产 agent 均可)。怎么装、怎么触发见下面[「怎么开始」](#怎么开始按你的情况选一条路)。
+> **这不是一个独立软件,是给 AI agent 用的 skill(技能包)**:程序管确定性(取数/扫描/护栏/出 Excel),AI 管判断(读懂条款、分清真假废标项)——**必须配一个 AI agent 一起用**(任何能操作本地文件的 AI 编程助手均可)。怎么装、怎么触发见下面[「怎么开始」](#怎么开始按你的情况选一条路)。
 >
 > **审的是招标方发的招标文件,服务的是要去投标的人。**
 >
@@ -19,7 +19,7 @@
 
 ## 怎么开始(按你的情况选一条路)
 
-### 🤖 路 1:你已经在用 AI 助手(Claude Code / Codex / Cursor / 通义灵码 等)⭐ 最省心
+### 🤖 路 1:你已经在用 AI 助手 ⭐ 最省心
 
 **第一次用·尝鲜(零安装)**:不用看任何文档,把下面这段话原样发给你的 AI(点代码块右上角即可复制):
 
@@ -35,33 +35,15 @@ https://github.com/matongAI-lab/tender-review-kit
 
 **用顺了·装成常驻 skill(以后一句话触发)**:
 
-Claude Code 用户把仓库装进 Claude Code 的 skills 目录:
-
-```powershell
-# Windows(PowerShell)
-git clone https://github.com/matongAI-lab/tender-review-kit.git "$env:USERPROFILE\.claude\skills\tender-review-kit"
-```
+把仓库 clone 到你 AI 工具的 skills 目录(各家工具的 skills 目录位置不一样,查你工具的文档),目录名统一用 `tender-review-kit`:
 
 ```bash
-# macOS / Linux
-git clone https://github.com/matongAI-lab/tender-review-kit.git ~/.claude/skills/tender-review-kit
+git clone https://github.com/matongAI-lab/tender-review-kit.git <你的 AI 工具 skills 目录>/tender-review-kit
 ```
 
-Codex 用户如果当前客户端支持本地 skills,装到 Codex 的 skills 目录:
+不确定你的工具 skills 目录在哪、或工具不支持本地 skill?继续用上面的 `FOR_AI.md` 咒语入口即可,效果一样。
 
-```powershell
-# Windows(PowerShell)
-git clone https://github.com/matongAI-lab/tender-review-kit.git "$env:USERPROFILE\.codex\skills\tender-review-kit"
-```
-
-```bash
-# macOS / Linux
-git clone https://github.com/matongAI-lab/tender-review-kit.git ~/.codex/skills/tender-review-kit
-```
-
-Cursor / 通义灵码 / Trae / CodeBuddy 等客户端的 skill 目录机制不完全一样;不确定时,继续用上面的 `FOR_AI.md` 咒语入口,不要照抄 `.claude/skills` 路径。
-
-- **怎么触发**:装好后,在支持 skill 的客户端里直接说人话——「帮我审这份招标文件」「看看这份标书的废标点」,它会按 [SKILL.md](SKILL.md) 开头的 description 识别该用这个 skill;想点名也行:「用 tender-review-skill 审这份标书」。
+- **怎么触发**:装好后,在支持 skill 的客户端里直接说人话——「帮我审这份招标文件」「看看这份标书的废标点」,它会按 [SKILL.md](SKILL.md) 开头的 description 识别该用这个 skill;想点名也行:「用 tender-review-kit 审这份标书」。
 - **首次使用**:AI 会先跑环境自检(`scripts/check_env.py`),缺什么会问你「装/不装」,不用自己研究。
 - **怎么更新**(顺便拉到别人贡献的判词,见[互惠机制](#怎么贡献互惠机制)):
   ```bash
@@ -71,30 +53,11 @@ Cursor / 通义灵码 / Trae / CodeBuddy 等客户端的 skill 目录机制不�
 
 ### 🐣 路 2:完全不懂技术,也没用过 AI 助手
 
-这个工具的"判断"环节需要一个 **能操作你电脑文件的 AI 助手**——装下面任意一个就行(只装这一次)。
-⚠️ 注意要装**桌面版 / 编辑器版 / 命令行版**,**纯网页聊天版不行**(网页版碰不到你电脑上的标书文件)。
-
-**国际工具:**
-
-| 工具 | 出品 | 一句话说明 |
-|------|------|-----------|
-| [Claude Code](https://claude.com/claude-code) ⭐ | Anthropic | 跟本 skill 配合最好(subagent 并行、红蓝对抗增强),首选 |
-| [OpenAI Codex](https://developers.openai.com/codex) | OpenAI | ChatGPT 同门,命令行 / 编辑器扩展 |
-| [Cursor](https://cursor.com) | Anysphere | 图形界面编辑器,agent 模式能干活 |
-| [Gemini CLI](https://github.com/google-gemini/gemini-cli) | Google | 免费额度大,有 Google 账号就能用 |
-
-**国内工具(中文界面,网络直连):**
-
-| 工具 | 出品 | 一句话说明 |
-|------|------|-----------|
-| [通义灵码](https://lingma.aliyun.com) | 阿里 | 编辑器插件 + AI 程序员模式 |
-| [Trae](https://www.trae.com.cn) | 字节跳动 | 图形界面,新手最容易上手 |
-| [CodeBuddy](https://copilot.tencent.com) | 腾讯 | 编辑器 + 智能体模式 |
-| [文心快码](https://comate.baidu.com) | 百度 | 编辑器插件 + 智能体模式 |
+这个工具的"判断"环节需要一个 **能操作你电脑文件的 AI 编程助手**——市面上有很多家(桌面版 / 编辑器版 / 命令行版都行),挑一个装上即可(只装这一次)。
+⚠️ 注意要装**能读写本地文件的版本**,**纯网页聊天版不行**(网页版碰不到你电脑上的标书文件)。
 
 装好后回到上面 **路 1**,把那段话发给它。
 
-> 选择困难?**国际选 Claude Code,国内选 Trae**——前者跟本 skill 配合最好,后者上手最容易。
 > 不想用 AI 助手、想自己手动装环境跑程序?看 [INSTALL.md](INSTALL.md)——全程只回答「装」或「不装」。
 
 ### 👨‍💻 路 3:工程师,自己跑
@@ -104,14 +67,14 @@ Cursor / 通义灵码 / Trae / CodeBuddy 等客户端的 skill 目录机制不�
 ## 版本路线
 
 **当前版本:Community Edition v0.1.9(社区开源版)**——本仓库内容,**MIT 许可,免费使用 / 修改 / 商用**。
-- 8 个核心程序(取数 / 撒网 / 补词×2 / 查漏 / 完整性 / 跨文件 / Excel) + 一键编排 `run_pipeline.py`
+- 8 个核心程序(取数 / 撒网 / 补词×2 / 查漏 / 完整性 / 跨文件 / Excel)+ 3 个辅助(环境自检 / 候选词入库 / 脱敏贡献)+ 一键编排 `run_pipeline.py`
 - **贡献隐私声明强化(v0.1.9 新增)**:明确告诉用户贡献完全自愿,不上传标书/Excel/原文/项目名,只提交判词短语和分类/scope,并默认通过 Issue 由维护者审核。
 - **开源判词库扩展(v0.1.8 新增)**:并入 5 个用户确认过、已脱敏的通用判词,提升无效响应/中标资格/联合体/分包转包/实质响应类命中。
 - **AI 发现词当前补漏回扫(v0.1.7 新增)**:AI 发现疑似判词后,先用临时词库回扫当前标书,不等用户入库;用户接受/拒绝只决定未来是否自动扫到。
 - **词库贡献提醒强化(v0.1.7 新增)**:verify 收尾固定说明本地词库/开源词库互惠机制,让 agent 稳定提醒用户可脱敏贡献新词。
 - **▲/★ 长表格行拆分增强(v0.1.6 新增)**:Word 表格摊平成一行时,同一行多个 `▲/★/※` 会逐条进入 `hits.json`;同时收窄目录页排除规则,避免正文参数里的"目录"字样误伤。
 - **小白零门槛入口(v0.1.5 新增)**:一段咒语发给任意 AI 助手即可全程代办(操作手册 [FOR_AI.md](FOR_AI.md));「怎么开始」三路分流 + 装成常驻 skill 的安装/触发说明
-- **判词库分两层**:开源词库(共享,~120+ 词)+ 用户本地词库(私有积累,gitignored)
+- **判词库分两层**:开源词库(共享,~170+ 词)+ 用户本地词库(私有积累,gitignored)
 - **AI 发现新词的用户审批流**:不再自动入库,用户拍板决定是否接受
 - **互惠贡献闭环**:你贡献几个,以后别人贡献的你也能拉到
 - 4 类常见标书的类型特化规则(工程·合理低价 / 货物·综合评分 / 政采服务 / 央企货物,并入审标对照清单)
@@ -143,7 +106,7 @@ Cursor / 通义灵码 / Trae / CodeBuddy 等客户端的 skill 目录机制不�
 1. **判词库是核心资产** —— 几百次实战攒的判决词,代码能开源,**判词库越用越厚是真护城河**。
 2. **可复现的扫描** —— 同样一份标书,跑十次结果一样。判词扫描是确定性的;准确率量化需专家真值集(路线图中)。
 3. **两层防漏机制** —— 反向校验防"漏抄",红蓝对抗防"判断死角"。
-4. **跨工具** —— 线性主干在 Claude / Codex / 国产 agent 都能跑;Claude 下额外有 subagent 并行 + 红蓝对抗增强。
+4. **跨工具** —— 线性主干在任何 AI agent 上都能跑;支持子代理(subagent)的工具还能额外开并行 + 红蓝对抗增强。
 
 ## 5 分钟上手
 
@@ -162,7 +125,7 @@ pip install -r requirements.txt
 # 2. 程序自动跑(取数 + 撒网 + 补词,几秒)
 python run_pipeline.py prep <招标文件.docx 或 .pdf>
 
-# 3. 把 prep 结尾打印的那段提示发给你的 AI agent(Claude / Codex / Workbuddy 等)
+# 3. 把 prep 结尾打印的那段提示发给你的 AI agent
 #    → agent 按 SKILL.md 步骤产出 workspace/<项目>.工作区.md
 #    → 含 AI 新发现的疑似判词(标 [AI发现])
 
@@ -193,6 +156,7 @@ tender-review-kit/
 ├── ARCHITECTURE.md       # 设计纲领(六层栈 + Python/LLM 分工 + 数据驱动)
 ├── run_pipeline.py       # 一键编排: prep(取数+扫描) / verify(护栏+Excel)
 ├── scripts/              # 程序层(确定性 + 护栏,纯标准库+少量 pip)
+│   ├── check_env.py           # 环境自检: 缺什么依赖 + 怎么装(首次必跑)
 │   ├── extract_text.py        # 取数: PDF/Word → 带行号文本
 │   ├── scan_keywords.py       # 判词撒网: 自动合并加载开源 + 本地词库
 │   ├── scan_candidates.py     # 补词引擎(程序通道): 正则扫疑似新判决词
@@ -204,7 +168,7 @@ tender-review-kit/
 │   ├── cross_doc.py           # 跨文件矛盾: 金额/日期/数量
 │   └── build_excel.py         # md 清单 → 多 sheet Excel
 ├── data/                 # 数据层
-│   ├── keywords.json          # 开源判词库 5 类 ⭐ 命根子(PR 可改,所有用户共享)
+│   ├── keywords.json          # 开源判词库 6 类 ⭐ 命根子(PR 可改,所有用户共享)
 │   └── local_keywords.json    # 用户本地积累(gitignored,审批入库后下次扫别标书自动用上)
 ├── references/           # 知识层(专项工作指南)
 │   ├── disqualification-checklist.md   # 审标对照总清单(废标点+隐性门槛+类型特化+必拿字段)
@@ -258,7 +222,7 @@ python scripts/export_contribution.py --github   # 一键提 Issue(需装 gh CLI
 
 - [x] 端到端跑通(覆盖货物·综合评分、央企货物、政采服务、工程·合理低价多类标书实战验证)
 - [x] A/B 红蓝对抗实验(两个独立 subagent 处理同一份 300+ ▲ 标书,覆盖一条不差,各自逮到对方盲区)
-- [x] 8 大程序 + 一键编排(`run_pipeline.py`)+ 通用机制清单
+- [x] 8 大核心程序 + 3 辅助 + 一键编排(`run_pipeline.py`)+ 通用机制清单
 - [x] 判词库分两层(开源共享 + 用户本地积累)+ 互惠贡献闭环(v0.1.3)
 - [x] AI 发现新词的用户审批流(v0.1.3)
 - [x] 小白零门槛上手:FOR_AI.md 咒语入口 + 三路分流 + skill 安装/触发说明(v0.1.5)

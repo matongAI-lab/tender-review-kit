@@ -1,16 +1,21 @@
 ---
-name: tender-review-skill
-description: 招标文件审标 / tender document review for bidders。审的是招标方发的招标文件(PDF/Word),服务的是要去投标的人。输出投标核对清单(废标项+评分项+证明材料+▲标识参数+时间节点),帮投标人在动手写投标文件之前把游戏规则吃透。当用户给出招标文件要审、问废标点/否决条款/评分项/资格要求,或要做投标前合规自检时使用——即使没明说"审核"。产清单和事实,不下"投/不投"结论。Use when analyzing Chinese tender/RFP documents for bidders: extract disqualification/scoring items, required materials, ▲-marked parameters, with line-numbered evidence.
+name: tender-review-kit
+description: >-
+  招标文件审标 / tender document review for bidders。审的是招标方发的招标文件(PDF/Word),服务的是要去投标的人。
+  输出投标核对清单(废标项+评分项+证明材料+▲标识参数+时间节点),帮投标人在动手写投标文件之前把游戏规则吃透。
+  当用户给出招标文件要审、问废标点/否决条款/评分项/资格要求,或要做投标前合规自检时使用——即使没明说"审核"。
+  产清单和事实,不下"投/不投"结论。Use when analyzing Chinese tender/RFP documents for bidders:
+  extract disqualification/scoring items, required materials, ▲-marked parameters, with line-numbered evidence.
 ---
 
-# 招标文件审标 tender-review-skill
+# 招标文件审标 tender-review-kit
 
 **审的是招标方发的招标文件,服务的是要去投标的人。**
 
 输入一份招标文件 → 产出「投标核对清单」——帮投标人在**动手写投标文件之前**,看清楚招标方的所有要求(哪些不达标会被废、哪些是评分点、要准备什么材料、哪些 ▲ 参数必须响应、哪些时间节点不能错)。
 
 - 产出 = **清单 + 事实**(每条带原文出处行号),**不下"投/不投"结论**——决策是投标人自己的事。
-- **工具无关主干**(任何 agent 工具能跑) + **Claude 增强**(subagent 并行 / 红蓝对抗)。
+- **工具无关主干**(任何 agent 工具能跑) + **多智能体增强**(支持 subagent 的工具可用:并行 / 红蓝对抗)。
 - 架构全貌见 `ARCHITECTURE.md`。
 
 ## 四条铁律(每个环节都守)
@@ -20,15 +25,17 @@ description: 招标文件审标 / tender document review for bidders。审的是
 3. **维度不绑值**:列「业绩要求」「质保期」这些维度,不假设某个具体年限/平台。
 4. **列事实带出处**:每条带 lines.txt 行号(护栏靠它核对)——行号要**覆盖判决词所在行**(单行精确,或跨行写范围 `行X–行Y`);`check_coverage` 默认 **±0 精确反查**,引用差几行会判"未覆盖"(宁可误报、不要假覆盖)。保留"否决/无效/视为/加盖原厂公章"等限制性原话;"详见下表/见前附表"必须跟进;评审表每行都是独立条款;评分项≠加分项。
 
-## 核心分工:判断交 Claude,确定性/护栏交程序
+## 核心分工:判断交 AI,确定性/护栏交程序
 
-| 沉进程序(scripts/) | 留给 Claude(读 references) |
+| 沉进程序(scripts/) | 留给 AI(读 references) |
 |---|---|
 | 确定性 / 可枚举 / 要保证不漏 / 量大 | 要读懂语义("无效投标"vs"无效数据")/ 随文本千变万化 / 靠上下文判断 |
 
-护栏**必须**是程序——Claude 无法可靠审计自己有没有偷懒压缩。
+护栏**必须**是程序——AI 无法可靠审计自己有没有偷懒压缩。
 
 ## 端到端流程(招标文件 → Excel)
+
+> **一键编排**:确定性步骤已封装进 `run_pipeline.py` —— `prep`(§0 取数 + §3 撒网/补词)与 `verify`(§5.5 收割 + §6 护栏 + §7 出 Excel)。想一键串联就用它,想逐步控制就照下面分步跑;无论哪种,AI 判断环节(§1/§2/§4/§5)始终由你来做。
 
 ### -1. 环境自检(首次必跑) ⭐ [程序]
 `python scripts/check_env.py`
@@ -41,16 +48,16 @@ description: 招标文件审标 / tender document review for bidders。审的是
 - ⚠ **可选项缺失**(如 pdftotext)→ 提示影响,用户决定装不装,然后继续(skill 内部会自动降级)
 - ✗ **必装项缺失**(Python / python-docx / pypdf)→ 明确告诉**接下来跑 §0 取数会失败**,**装好之前不要继续**
 
-> Claude / agent 接到用户首次请求时,**先跑这一步**,不要直接跳进 §0。如果是熟悉用户(已确认环境就绪),可跳过。
+> AI agent 接到用户首次请求时,**先跑这一步**,不要直接跳进 §0。如果是熟悉用户(已确认环境就绪),可跳过。
 
 ### 0. 取数　[程序]
 `python scripts/extract_text.py <招标文件> --outdir workspace`
 → `<项目>.lines.txt`(带行号,一切定位的锚点) + `.tables.json`。支持 .docx/.pdf;.doc 先另存为 docx/pdf。
 
-### 1. 摸底 + 对照审标清单　[Claude 判断]
+### 1. 摸底 + 对照审标清单　[AI 判断]
 读封面 + 目录 + 须知前 ~200 行,**扫基本盘**(什么法规、买货/工程/服务、综合评分/低价)。**不分 9 类、不套模板**——大模型直接读懂文件,不需要先分类选模板。然后对照 `references/disqualification-checklist.md` **逐条看这份有没有那些坑**(隐性门槛 / 中小企业价扣 / CCC 三者一致 / 投标担保…)。核心永远是:**找 ▲ 星号项 + 找商务非标项**。
 
-### 2. 产物定位　[Claude 判断]
+### 2. 产物定位　[AI 判断]
 Grep 章节标题,定位 4 必扫产物的**行号范围**:投标人须知 / 评标办法 / 评分细则 / 评审标准表。形式多样(章节 / 表 / N 表替代),不盲信单一形式。
 
 ### 3. 双扫描:撒网 + 补词　[程序]
@@ -59,7 +66,7 @@ Grep 章节标题,定位 4 必扫产物的**行号范围**:投标人须知 / 评
 
 **① 撒网(必做,为当前这份标书):**
 `python scripts/scan_keywords.py workspace/<项目>.lines.txt`
-→ `.hits.json`:用现有判词库(5 类、100+ 词)逐行扫,5 类命中(判决词 / 二级 / 关系门槛 / 证明文件 / ▲★,▲★ 自适应识别、少量也不丢;表格摊平成一行时按多个标识拆分)。**宽撒网、含噪音**,去噪留给 subagent。**不跑这步,后面 subagent 没线索池可用,流程断。**
+→ `.hits.json`:用现有判词库(6 类、170+ 词)逐行扫,6 类命中(判决词 / 合同条款 / 二级 / 关系门槛 / 证明文件 / ▲★,▲★ 自适应识别、少量也不丢;表格摊平成一行时按多个标识拆分)。**宽撒网、含噪音**,去噪留给 subagent。**不跑这步,后面 subagent 没线索池可用,流程断。**
 
 **② 补词(顺手跑,为未来攒词库):**
 `python scripts/scan_candidates.py workspace/<项目>.lines.txt --hits workspace/<项目>.hits.json`
@@ -75,7 +82,7 @@ Grep 章节标题,定位 4 必扫产物的**行号范围**:投标人须知 / 评
 ### 4. 建工作区
 `workspace/<项目>.工作区.md`:项目元信息 + 第 2 步的章节行号 + 商务/技术分区。
 
-### 5. 派专项(商务线 / 技术线分头)　[Claude 判断,可 subagent 并行]
+### 5. 派专项(商务线 / 技术线分头)　[AI 判断,可 subagent 并行]
 每个专项:读对应 reference + hits.json → **只读自己的章节行号范围**(不全读) → 筛撒网去噪 + 对照 `disqualification-checklist.md`(审标对照总清单) + 实读条款 → 写工作区对应分区。
 
 - **商务线**(`references/commercial/`):废标排查[✓] · 评分(价格分 + 商务分) · 证明文件清册(横切聚合,**输出标准 md 表格**) · 关系门槛 · 时间节点 · **合同条款·要点[新,中标后约束]** ⭐
@@ -109,7 +116,7 @@ Grep 章节标题,定位 4 必扫产物的**行号范围**:投标人须知 / 评
 
 > ⭐ **当前补漏 ≠ 入库沉淀**:AI 已经发现的疑似判词,必须先用于当前标书补漏;这一步不写 `data/local_keywords.json`,不需要用户同意。用户后面接受/拒绝,只决定这些词以后扫别的标书是否自动命中。
 
-### 5.6. AI 对话,请用户拍板　[Claude 询问]
+### 5.6. AI 对话,请用户拍板　[AI 询问]
 **关键:AI 发现的词不能默默入库**——AI 判断可能漏估语境("无效投标"vs"无效数据"),用户最了解自己领域,必须由用户拍板。
 
 AI 用自然对话告知用户:
@@ -132,7 +139,7 @@ AI 用自然对话告知用户:
 
 接受的词进 `data/local_keywords.json`(gitignored)。拒绝入库只表示这些词以后不自动用于新标书,**不代表当前标书可以忽略**;当前标书仍按 5.5 的临时回扫结果逐条判断补漏。
 
-### 5.7. AI 补漏判断　[程序 + Claude 判断]
+### 5.7. AI 补漏判断　[程序 + AI 判断]
 5.5 默认已经用临时词库回扫当前 lines.txt;`--accept-all`/`--accept` 之后还会用正式本地词库再扫一次,供对照。两者都只产出线索,AI 必须逐条判断:
 
 AI 看新增命中,逐条判断:
@@ -146,12 +153,12 @@ AI 看新增命中,逐条判断:
 - `python scripts/check_coverage.py <hits.json> <工作区.md> [--strict]` —— 撒网命中是否被废标清单覆盖,未覆盖按严重度列出,**逐条核**(未覆盖 ≠ 漏,不卡覆盖率阈值)。容差默认 **±0 精确匹配**(放宽会把相邻不同条款误判已覆盖);`--strict` 在有 high 级未覆盖时非零退出,供自动流程 gate。
 - `python scripts/check_completeness.py <工作区.md> --hits <hits.json> [--strict]` —— 条数通用基线 / 评分梯度含"分"字 / ▲ ≥ 撒网 ×80%;`--strict` 有 warning 时非零退出。
 
-**第二层 · Claude(防"判断死角")** —— 见下「质量旋钮」。
+**第二层 · AI(防"判断死角")** —— 见下「质量旋钮」。
 
 ### 7. 出报告　[程序]
-`python scripts/build_excel.py <out.xlsx> <各专项 md...>` → 多 sheet Excel(废标红 / 评分绿 / ▲橙 / 证明紫 / 时间蓝,冻结首行、可筛选)。另存一份 Markdown 总览。
+`python scripts/build_excel.py <out.xlsx> <各专项 md...>` → 多 sheet Excel(废标红 / 评分绿 / ▲橙 / 证明紫 / 时间蓝 / 合同淡黄,冻结首行、可筛选)。另存一份 Markdown 总览。
 
-### 8. 收尾：开源词库的互惠机制（固定说明 + 可选贡献）　[Claude 询问]
+### 8. 收尾：开源词库的互惠机制（固定说明 + 可选贡献）　[AI 询问]
 出完 Excel 后,**必须用 2-3 句话复述词库机制**:本地词库只在用户机器上;开源词库靠大家脱敏贡献;定期 `git pull` 可以拿到别人贡献的新词。然后检查 `data/local_keywords.json` 是否存在且非空（本次或历次审标接受入库的词）。如果有,**用自然对话询问用户是否愿意贡献普遍适用的词**:
 
 > 这次你接受入库的判词(像"取消中标资格""不接受联合体投标"这种),已经留在你的本地词库里——下次扫别的标书会自动用上。
@@ -186,13 +193,14 @@ AI 看新增命中,逐条判断:
 ## 文件地图
 
 ```
-scripts/    extract_text✓ scan_keywords✓(为当前) scan_candidates✓(为未来,程序补词)
-            harvest_ai_words✓(收割AI发现) check_coverage✓ check_completeness✓
-            cross_doc✓(跨文件矛盾) build_excel✓
+run_pipeline.py  一键编排:prep(取数+撒网+补词) / verify(护栏+出 Excel)
+scripts/    check_env✓(环境自检) extract_text✓ scan_keywords✓(为当前) scan_candidates✓(为未来,程序补词)
+            harvest_ai_words✓(收割AI发现) promote_candidates✓(候选词入库) export_contribution✓(脱敏贡献)
+            check_coverage✓ check_completeness✓ cross_doc✓(跨文件矛盾) build_excel✓
 references/ disqualification-checklist✓(审标对照总清单:废标点+隐性门槛+类型特化+必拿字段)
             commercial/ disqualification✓ scoring✓ certifications-roster✓ timeline✓ contract-terms✓(合同条款·要点)
             technical/  essential-response✓ scoring✓ spec-deviation✓
-data/       keywords.json✓(命根子,120+ 词) | 候选词在 workspace/<项目>.candidates.json(含原文,不入库) | 不再分 9 类,改用 disqualification-checklist.md 逐条对照
+data/       keywords.json✓(命根子,170+ 词) | 候选词在 workspace/<项目>.candidates.json(含原文,不入库) | 不再分 9 类,改用 disqualification-checklist.md 逐条对照
 ARCHITECTURE.md  六层架构纲领
 ```
 
@@ -200,4 +208,4 @@ ARCHITECTURE.md  六层架构纲领
 端到端跑通涵盖货物·综合评分、央企货物、政采服务、工程·合理低价等多类标书。典型规模:取数千行级 / 撒网百级判决词 / 双线专项产出废标项 + 评分项 + ▲ 清单(数百级) + 证明清册 + 时间节点 → 程序护栏 + 人工复核。A/B 红蓝对抗已实证可逮出各方盲区(计分说明行 / 隐性门槛升格)。
 
 ## 跨工具 / 依赖
-程序 = Python 标准库 + python-docx + pypdf + openpyxl(均 pip);系统依赖仅 pdftotext(PDF 用,缺则回退 pypdf)。相对路径。subagent 是 Claude / Claude Code 专属,其他工具(Codex / workbuddy / 阿里)走线性 §5,输出一致。
+程序 = Python 标准库 + python-docx + pypdf + openpyxl(均 pip);系统依赖仅 pdftotext(PDF 用,缺则回退 pypdf)。相对路径。subagent 并行是支持多智能体的 agent 工具专属,其它工具走线性 §5,输出一致。

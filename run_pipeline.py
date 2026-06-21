@@ -72,7 +72,7 @@ def prep(tender_file, outdir):
     print("✓ prep 完成！产出文件在 %s/" % outdir)
     print()
     print("接下来：")
-    print("  1. 把下面这段话发给你的 AI agent（Claude / Workbuddy / Codex）：")
+    print("  1. 把下面这段话发给你的 AI agent：")
     print()
     print('  ─── 复制开始 ───')
     print('  请按 SKILL.md 的步骤 1-2-4-5 审核这份招标文件。')

@@ -1,9 +1,10 @@
 #!/usr/bin/env python3
 # -*- coding: utf-8 -*-
-"""scan_keywords.py — 判决词撒网：在「带行号文本」上扫 5 类信号
+"""scan_keywords.py — 判决词撒网：在「带行号文本」上扫 6 类信号
 
 读取 extract_text.py 产出的 *.lines.txt + data/keywords.json，逐行扫描：
   - primary       一级判决词（带 scope：bid_phase/evaluation_phase/contract_phase）
+  - contract      合同条款·要点（中标后约束，不计入废标）
   - secondary     二级判决词
   - customization  商务定制门槛（关系门槛：厂商授权/必须接入…）
   - certifications 证明文件要求（正则，含 exclude 排除质保维保类误命中）
