@@ -597,7 +597,7 @@
       "match_type": "regex",
       "scope_required": false,
       "report_section": "七、证明文件要求",
-      "_doc": "识别招标文件要求的证明文件 — 检测报告、认证证书、入网证、官网截图等",
+      "_doc": "识别招标文件要求的证明文件 — 检测报告、认证证书、入网证、官网截图、人员社保缴纳证明等。注:人员类社保/证书常只在评分项出现,务必配合 references/commercial/certifications-roster.md 横切评分清单。",
       "exclude_patterns": [
         "提供.{0,5}质保",
         "提供.{0,5}维保",
@@ -624,7 +624,11 @@
         "ISO9001",
         "ISO14001",
         "ISO45001",
-        "CNAS"
+        "CNAS",
+        "ilAC",
+        "社保",
+        "社会保险",
+        "缴纳.{0,6}社保"
       ]
     },
     {

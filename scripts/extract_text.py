@@ -2,8 +2,8 @@
 # -*- coding: utf-8 -*-
 """extract_text.py — 统一取数：PDF / Word(.docx) → 「带行号文本 + 结构化表格」
 
-tender-review-kit 的地基程序：把任意格式的招标文件转成统一的、带行号的纯文本，
-供后续判决词扫描 / 查漏 / 各 subagent 通读。
+tender-review-skill 的地基程序：把任意格式的招标文件转成统一的、带行号的纯文本，
+供后续判决词扫描 / 查漏 / 各专项 AI 通读。
 行号是提取后「自编的定位锚点」（文件本身没有行号，PDF/Word 都没有）。
 
 用法:

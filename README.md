@@ -1,4 +1,4 @@
-# tender-review-kit · 招标文件审标 skill(为投标人服务)
+# tender-review-skill · 招标文件审标 skill(为投标人服务)
 
 > **这不是一个独立软件,是给 AI agent 用的 skill(技能包)**:程序管确定性(取数/扫描/护栏/出 Excel),AI 管判断(读懂条款、分清真假废标项)——**必须配一个 AI agent 一起用**(任何能操作本地文件的 AI 编程助手均可)。怎么装、怎么触发见下面[「怎么开始」](#怎么开始按你的情况选一条路)。
 >
@@ -43,7 +43,7 @@ git clone https://github.com/matongAI-lab/tender-review-kit.git <你的 AI 工�
 
 不确定你的工具 skills 目录在哪、或工具不支持本地 skill?继续用上面的 `FOR_AI.md` 咒语入口即可,效果一样。
 
-- **怎么触发**:装好后,在支持 skill 的客户端里直接说人话——「帮我审这份招标文件」「看看这份标书的废标点」,它会按 [SKILL.md](SKILL.md) 开头的 description 识别该用这个 skill;想点名也行:「用 tender-review-kit 审这份标书」。
+- **怎么触发**:装好后,在支持 skill 的客户端里直接说人话——「帮我审这份招标文件」「看看这份标书的废标点」,它会按 [SKILL.md](SKILL.md) 开头的 description 识别该用这个 skill;想点名也行:「用 tender-review-skill 审这份标书」。
 - **首次使用**:AI 会先跑环境自检(`scripts/check_env.py`),缺什么会问你「装/不装」,不用自己研究。
 - **怎么更新**(顺便拉到别人贡献的判词,见[互惠机制](#怎么贡献互惠机制)):
   ```bash
@@ -99,7 +99,7 @@ git clone https://github.com/matongAI-lab/tender-review-kit.git <你的 AI 工�
 - **老牌投标软件**:靠关键词匹配。死板,不会读——"无效投标"和"无效数据"分不清,误报一大堆。
 - **新的 AI 标书工具**:让大模型读。会读,但**漏了你不知道、这次和下次不一样、攒不下东西**。
 
-**tender-review-kit 把两者长处缝起来,而且把"准确/不漏"摆在第一**:
+**tender-review-skill 把两者长处缝起来,而且把"准确/不漏"摆在第一**:
 > **判词库**(确定的底盘,保证该找的不漏) × **大模型读懂**(分清"无效投标"vs"无效数据") × **程序护栏**(防压缩 + 反向校验) × **A/B 红蓝对抗**(防判断死角)
 
 **核心优势**:
